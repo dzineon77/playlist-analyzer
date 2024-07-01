@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Music } from 'lucide-react';
 
 async function generateCodeChallenge() {
   const generateRandomString = (length) => {
@@ -91,20 +92,31 @@ function Home() {
     }, []);
 
     return (
-
-        <div className='Home'>
-          <div className="header">
-            <h1>Playlist Analyzer</h1>
-            <p>Welcome to Playlist Analyzer! This app will help you analyze various characterists in your Spotify playlists.</p>
-          </div>
-          
-          <div className="container">
-            <p>Click the button below to authorize access to your Spotify account to get started</p>
-            <button className='loginBtn' onClick={requestUserAuth}>Login</button>
-          </div>
+    <div className="min-h-screen bg-green-light flex items-center justify-center p-4">
+      <div className="bg-white-light rounded-lg shadow-xl p-8 max-w-md w-full">
+        <div className="text-center mb-8">
+          <Music className="mx-auto text-green-500 mb-4" size={48} />
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">Playlist Analyzer</h1>
+          <p className="text-gray-600">Discover insights about your music by exploring audio features and trends</p>
         </div>
 
-    );
-}
+        <div className="space-y-6">
+          <div className="bg-gray-100 rounded-lg p-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800">Ready to explore?</h2>
+              <p className="text-sm text-gray-600">Connect your Spotify account to get started</p>
+            </div>
+            <button
+              className="bg-green-dark hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out transform hover:scale-105"
+              onClick={requestUserAuth}
+            >
+              Connect
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default Home;

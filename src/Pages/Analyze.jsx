@@ -8,18 +8,18 @@ export default function Analyze() {
     const [isToggled, setIsToggled] = useState(false);
     const [playlists, setPlaylists] = useState([]);
 
-    useEffect(() => {
-        getToken(setAccessToken);
-        getPlaylists();
-    }, []);
-
     const handleToggleChange = () => {
         setIsToggled(!isToggled);
     };
 
+    useEffect(() => {
+        getToken(setAccessToken);
+        getPlaylists();
+    }, [accessToken]);
+    
     const getPlaylists = async () => {
         try {
-            const response = await fetch('https://api.spotify.com/v1/me/playlists?limit=100', {
+            const response = await fetch('https://api.spotify.com/v1/me/playlists', {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
@@ -32,16 +32,17 @@ export default function Analyze() {
         }
     };
 
-    return (
-        <div className='Analyze'>
-            <div className="header">
-                <h1>Playlist Analyzer</h1>
-                <p>Search for a Spotify playlist URL to get started.</p>
-                <p>Access Token: {accessToken}</p>
-            </div>
 
-            <div className="container">
-                <div className="search">
+
+    return (
+        <div className='min-h-screen bg-green-light flex items-center justify-center p-10'>
+            <div className="min-w-fit bg-white rounded-lg shadow-xl p-8">
+                <div className="header bg-white-light rounded-lg shadow-xl p-8 m-10">
+                    <h1 className='text-xl font-bold'>Playlist Analyzer</h1>
+                    <p>Access Token: {accessToken}</p>
+                </div>
+
+            <div className="grid justify-items-center bg-white-light rounded-lg shadow-xl p-8">
                     <input
                         type="checkbox"
                         id="toggle"
@@ -53,12 +54,12 @@ export default function Analyze() {
                         <div>Search Users</div>
                         <div>Your Playlists</div>
                     </label>
-                </div>
 
                 <div className="results">
                     {isToggled ? <SearchPlaylists playlists={playlists}/> : <SearchUsers />}
                 </div>
             </div>
         </div>
+    </div>
     );
 }
