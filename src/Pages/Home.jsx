@@ -32,7 +32,7 @@ async function requestUserAuth() {
   const { codeVerifier, codeChallenge } = await generateCodeChallenge();
 
   const clientId = '59b9850087ac4d05b261fc70a5431b3c';
-  const redirectUri = 'http://localhost:3000';
+  const redirectUri = 'http://localhost:3000/analyze';
   const scope = 'user-read-private user-read-email';
   const authUrl = new URL("https://accounts.spotify.com/authorize");
 
@@ -51,13 +51,13 @@ async function requestUserAuth() {
   window.location.href = authUrl.toString();
 }
 
-async function getToken(setAccessToken) {
+export async function getToken(setAccessToken) {
   const code = new URLSearchParams(window.location.search).get('code');
   if (!code) return;
 
   let codeVerifier = localStorage.getItem('code_verifier');
   const clientId = '59b9850087ac4d05b261fc70a5431b3c';
-  const redirectUri = 'http://localhost:3000';
+  const redirectUri = 'http://localhost:3000/analyze';
   const url = 'https://accounts.spotify.com/api/token';
 
   const payload = {
@@ -83,7 +83,7 @@ async function getToken(setAccessToken) {
   }
 }
 
-export default function Home() {
+function Home() {
     const [accessToken, setAccessToken] = useState(localStorage.getItem('access_token'));
 
     useEffect(() => {
@@ -91,12 +91,20 @@ export default function Home() {
     }, []);
 
     return (
-        <div>
+
+        <div className='Home'>
+          <div className="header">
             <h1>Playlist Analyzer</h1>
             <p>Welcome to Playlist Analyzer! This app will help you analyze various characterists in your Spotify playlists.</p>
+          </div>
+          
+          <div className="container">
             <p>Click the button below to authorize access to your Spotify account to get started</p>
-            <button onClick={requestUserAuth}>Login</button>
-            <p>Access Token: {accessToken}</p>
+            <button className='loginBtn' onClick={requestUserAuth}>Login</button>
+          </div>
         </div>
+
     );
 }
+
+export default Home;
