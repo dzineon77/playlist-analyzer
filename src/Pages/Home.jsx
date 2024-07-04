@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Music } from 'lucide-react';
 
 async function generateCodeChallenge() {
@@ -34,10 +34,14 @@ async function requestUserAuth() {
 
   const clientId = '59b9850087ac4d05b261fc70a5431b3c';
   const redirectUri = 'http://localhost:3000/analyze';
-  const scope = 'user-read-private user-read-email';
+  const scope = 'user-read-private user-read-email playlist-read-private';
   const authUrl = new URL("https://accounts.spotify.com/authorize");
 
-  window.localStorage.setItem('code_verifier', codeVerifier);
+  
+  // Clear any existing session data
+  sessionStorage.clear();
+
+  sessionStorage.setItem('code_verifier', codeVerifier);
 
   const params = {
     response_type: 'code',
@@ -52,44 +56,12 @@ async function requestUserAuth() {
   window.location.href = authUrl.toString();
 }
 
-export async function getToken(setAccessToken) {
-  const code = new URLSearchParams(window.location.search).get('code');
-  if (!code) return;
-
-  let codeVerifier = localStorage.getItem('code_verifier');
-  const clientId = '59b9850087ac4d05b261fc70a5431b3c';
-  const redirectUri = 'http://localhost:3000/analyze';
-  const url = 'https://accounts.spotify.com/api/token';
-
-  const payload = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
-      client_id: clientId,
-      grant_type: 'authorization_code',
-      code,
-      redirect_uri: redirectUri,
-      code_verifier: codeVerifier,
-    }),
-  };
-
-  const response = await fetch(url, payload);
-  const data = await response.json();
-
-  if (data.access_token) {
-    localStorage.setItem('access_token', data.access_token);
-    setAccessToken(data.access_token);
-  }
-}
-
 function Home() {
-    const [accessToken, setAccessToken] = useState(localStorage.getItem('access_token'));
-
-    useEffect(() => {
-        getToken(setAccessToken);
-    }, []);
+  
+  useEffect(() => {
+    // Clear session data when component mounts
+    sessionStorage.clear();
+  }, []);
 
     return (
     <div className="min-h-screen bg-green-light flex items-center justify-center p-4">

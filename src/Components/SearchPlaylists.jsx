@@ -18,6 +18,7 @@ export default function SearchPlaylists({ playlists }) {
 
     return (
         <div className="SearchPlaylists">
+            <h2>Search Playlists</h2>
             <input
                 type="text"
                 id="myInput"
@@ -28,7 +29,7 @@ export default function SearchPlaylists({ playlists }) {
             <ul id="myUL">
                 {playlists.map((playlist, index) => (
                     <li key={index}>
-                        {/* <img className="playlistPic" src={playlist.images[0].url} alt={playlist.name} href="#"/> */}
+                        <img className="playlistPic" src={playlist.images[0].url} alt={playlist.name} href="#"/>
                         <p>{playlist.name}</p>
                         <p>Tracks Total: {playlist.tracks.total}</p>
                     </li>
