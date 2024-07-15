@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import { Music } from 'lucide-react';
 
 async function generateCodeChallenge() {
@@ -32,11 +31,10 @@ async function generateCodeChallenge() {
 async function requestUserAuth() {
   const { codeVerifier, codeChallenge } = await generateCodeChallenge();
 
-  const clientId = '59b9850087ac4d05b261fc70a5431b3c';
+  const clientId = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
   const redirectUri = 'http://localhost:3000/analyze';
   const scope = 'user-read-private user-read-email playlist-read-private';
   const authUrl = new URL("https://accounts.spotify.com/authorize");
-
   
   // Clear any existing session data
   sessionStorage.clear();
@@ -57,12 +55,6 @@ async function requestUserAuth() {
 }
 
 function Home() {
-  
-  useEffect(() => {
-    // Clear session data when component mounts
-    sessionStorage.clear();
-  }, []);
-
     return (
     <div className="min-h-screen bg-green-light flex items-center justify-center p-4">
       <div className="bg-white-light rounded-lg shadow-xl p-8 max-w-md w-full">
