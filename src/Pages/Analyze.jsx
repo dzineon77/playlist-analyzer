@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import SearchPlaylists from '../Components/SearchPlaylists';
-import SearchUsers from '../Components/SearchUsers';
-import { useNavigate } from 'react-router-dom';
+import SearchSongs from '../Components/SearchSongs';
+import UserPanel from '../Components/UserPanel';
 
 const CLIENT_ID = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
 const REDIRECT_URI = 'http://localhost:3000/analyze';
@@ -30,25 +30,29 @@ async function getOrRefreshToken(setError) {
         if (code) {
             // Exchange code for token
             const codeVerifier = sessionStorage.getItem('code_verifier');
-            const response = await fetch('https://accounts.spotify.com/api/token', {
+
+            const payload = {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                },
                 body: new URLSearchParams({
-                    client_id: CLIENT_ID,
-                    grant_type: 'authorization_code',
-                    code,
-                    redirect_uri: REDIRECT_URI,
-                    code_verifier: codeVerifier,
+                  client_id: CLIENT_ID,
+                  grant_type: 'authorization_code',
+                  code,
+                  redirect_uri: REDIRECT_URI,
+                  code_verifier: codeVerifier,
                 }),
-            });
-            return handleTokenResponse(response, setError);
-        } else {
-            // No code, redirect to login
-            setError('No code, redirecting to login');
-            console.log('No code, redirecting to login');
-            sessionStorage.clear();
-            window.location.href = 'http://localhost:3000/';
-            return null;
+              }
+
+            try {
+                const response = await fetch('https://accounts.spotify.com/api/token', payload);
+                return handleTokenResponse(response, setError);
+            } catch (error) {
+                console.log('Failed to exchange code for access token:', error);
+                setError("Failed to exchange code for access token: " + error.message);
+                return null;
+            }
         }
     }
 }
@@ -57,13 +61,13 @@ export default function Analyze() {
     const [accessToken, setAccessToken] = useState(sessionStorage.getItem('access_token'));
     const [isToggled, setIsToggled] = useState(false);
     const [playlists, setPlaylists] = useState([]);
+    const [userProfileData, setUserProfileData] = useState(null);
     const [error, setError] = useState(null);
-    const navigate = useNavigate();
 
     const getPlaylists = async () => {
         try {
-            const response = await fetch('https://api.spotify.com/v1/me/playlists?limit=10', {
-                headers: { Authorization: `Bearer ${accessToken}` }
+            const response = await fetch('https://api.spotify.com/v1/me/playlists?limit=50', {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
             });
 
             const data = await response.json();
@@ -71,14 +75,27 @@ export default function Analyze() {
             setError(null);
         } catch (error) {
             console.error('Error fetching playlists:', error);
+            setPlaylists([]);
             setError("Failed to fetch playlists: " + error.message);
         }
     };
 
-    const handleLogout = () => {
-        sessionStorage.clear();
-        navigate('/');
-    };
+    const getUserProfile = async () => {
+    
+        try {
+          const response = await fetch('https://api.spotify.com/v1/me', {
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+          });
+    
+          const data = await response.json();
+          setUserProfileData(data);
+          setError(null);
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+          setUserProfileData(null);
+          setError("Failed to fetch user profile: " + error.message);
+        }
+      };
 
     const handleToggleChange = () => setIsToggled(!isToggled);
 
@@ -93,22 +110,19 @@ export default function Analyze() {
     useEffect(() => {
         if (accessToken) {
             getPlaylists();
+            getUserProfile();
         }
         //eslint-disable-next-line
     }, [accessToken]);
 
     return (
+        <>
+        <UserPanel userData={userProfileData}/>        
         <div className='min-h-screen bg-green-light flex items-center justify-center p-10'>
             <div className="min-w-fit bg-white rounded-lg shadow-xl p-8">
                 <div className="header bg-white-light rounded-lg shadow-xl p-8 m-10">
                     <h1 className='text-xl font-bold'>Playlist Analyzer</h1>
                     {error && <p className="text-red-500">Error: {error}</p>}
-                    <button
-                        className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full mt-4"
-                        onClick={handleLogout}
-                    >
-                        Logout
-                    </button>
                 </div>
 
                 <div className="grid justify-items-center bg-white-light rounded-lg shadow-xl p-8">
@@ -125,10 +139,12 @@ export default function Analyze() {
                     </label>
 
                     <div className="results">
-                        {isToggled ? <SearchPlaylists playlists={playlists}/> : <SearchUsers />}
+                        {isToggled ? <SearchPlaylists playlists={playlists}/> : <SearchSongs />}
                     </div>
                 </div>
             </div>
         </div>
+
+        </>
     );
 }

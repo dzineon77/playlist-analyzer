@@ -1,10 +1,11 @@
+import React from 'react';
 
 export default function SearchPlaylists({ playlists }) {
     const handleInputChange = (event) => {
         const filter = event.target.value.toUpperCase();
         const ul = document.getElementById("myUL");
         const li = ul.getElementsByTagName("li");
-
+        
         for (let i = 0; i < li.length; i++) {
             const a = li[i].getElementsByTagName("p")[0];
             const txtValue = a.textContent || a.innerText;
@@ -15,7 +16,7 @@ export default function SearchPlaylists({ playlists }) {
             }
         }
     };
-
+    
     return (
         <div className="SearchPlaylists">
             <h2>Search Playlists</h2>
@@ -25,13 +26,17 @@ export default function SearchPlaylists({ playlists }) {
                 onKeyUp={handleInputChange}
                 placeholder="Search playlists"
             />
-
+            
             <ul id="myUL">
                 {playlists.map((playlist, index) => (
                     <li key={index}>
-                        <img className="playlistPic" src={playlist.images[0].url} alt={playlist.name} href="#"/>
-                        <p>{playlist.name}</p>
-                        <p>Tracks Total: {playlist.tracks.total}</p>
+                        <img 
+                            className="playlistPic" 
+                            src={playlist.images && playlist.images.length > 0 ? playlist.images[0].url : './Assets/Spotify_logo_without_text.svg.png'} 
+                            alt={playlist.name || 'Playlist'} 
+                        />
+                        <p>{playlist.name || 'Untitled Playlist'}</p>
+                        <p>Tracks Total: {playlist.tracks ? playlist.tracks.total : 'N/A'}</p>
                     </li>
                 ))}
             </ul>
