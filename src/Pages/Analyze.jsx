@@ -72,6 +72,7 @@ export default function Analyze() {
 
             const data = await response.json();
             setPlaylists(data.items);
+            console.log(data.items);
             setError(null);
         } catch (error) {
             console.error('Error fetching playlists:', error);
@@ -119,13 +120,13 @@ export default function Analyze() {
         <>
         <UserPanel userData={userProfileData}/>        
         <div className='min-h-screen bg-green-light flex items-center justify-center p-10'>
-            <div className="min-w-fit bg-white rounded-lg shadow-xl p-8">
+            <div className="w-3/4 bg-white rounded-lg shadow-xl p-8">
                 <div className="header bg-white-light rounded-lg shadow-xl p-8 m-10">
                     <h1 className='text-4xl font-bold'>Playlist Analyzer</h1>
                     {error && <p className="text-red-500">Error: {error}</p>}
                 </div>
 
-                <div className="grid justify-items-center bg-white-light rounded-lg shadow-xl p-8">
+                <div className="grid justify-items-center bg-white-light rounded-lg shadow-xl p-8 ">
                     <input
                         type="checkbox"
                         id="toggle"
@@ -138,7 +139,7 @@ export default function Analyze() {
                         <div>Your Playlists</div>
                     </label>
 
-                    <div className="results">
+                    <div className="results min-w-full">
                         {isToggled ? <SearchPlaylists playlists={playlists}/> : <SearchSongs />}
                     </div>
                 </div>

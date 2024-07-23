@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import FeatureCell from './FeatureCell';
 
 export default function SearchSongs() {
@@ -111,9 +110,19 @@ export default function SearchSongs() {
                     <h3 className='font-bold text-4xl'>{trackData.name}</h3>
                     <p className='text-2xl'>{trackData.artists[0].name}</p>
                     <p className='text-2xl'><strong>Album:</strong> {trackData.album.name}</p>
-                    <div className='flex justify-center'>
-                        <img src={trackData.album.images[0].url} alt={trackData.name} className='m-4 max-w-md max-h-md' />
+                    <script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
+                    
+                    <div id='embed-iframe' className='flex justify-center'>
+                        <iframe
+                            src={`https://open.spotify.com/embed/track/${trackData.id}`}
+                            width="500"
+                            height="400"
+                            allowtransparency="true"
+                            allow="encrypted-media"
+                            className='m-4'
+                        ></iframe>
                     </div>
+
                 </div>
             )}
 
@@ -144,8 +153,8 @@ export default function SearchSongs() {
                         {recommendations.tracks.slice(0, 3).map((track) => (
                             <div key={track.id} className="block text-center cursor-pointer border rounded-lg">
                                 <h4 className='text-sm font-semibold truncate p-2'>{track.name}</h4>
-                                <p className='text-sm truncate'>{track.artists[0].name}</p>
-                                <p className='text-sm truncate'><strong>Album:</strong> {track.album.name}</p>
+                                <p className='text-sm truncate'><strong>{track.artists[0].name}</strong></p>
+                                <p className='text-sm truncate px-2'><strong>Album:</strong> {track.album.name}</p>
                                 <img src={track.album.images[0].url} alt={track.name} className='m-auto p-4' onClick={() => handleTrackClick(track.id)} />
                             </div>
                         ))}
