@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import FeatureCell from './FeatureCell';
 
 export default function SearchSongs() {
@@ -78,6 +79,12 @@ export default function SearchSongs() {
         event.target.reset();
 
     };
+
+    const handleTrackClick = async (trackID) => {
+        getTrackData(trackID);
+        getTrackAF(trackID);
+        getRecommendations(trackID);
+    };
     
     return (
         <div className='SearchSongs max-w-4xl mx-auto px-4 justify-items-center'>
@@ -105,7 +112,7 @@ export default function SearchSongs() {
                     <p className='text-2xl'>{trackData.artists[0].name}</p>
                     <p className='text-2xl'><strong>Album:</strong> {trackData.album.name}</p>
                     <div className='flex justify-center'>
-                        <img src={trackData.album.images[0].url} alt={trackData.name} className='m-4' />
+                        <img src={trackData.album.images[0].url} alt={trackData.name} className='m-4 max-w-md max-h-md' />
                     </div>
                 </div>
             )}
@@ -135,11 +142,11 @@ export default function SearchSongs() {
                     <h3 className='font-bold text-2xl mb-4'>Recommended Tracks</h3>
                     <div className="recommendationList grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         {recommendations.tracks.slice(0, 3).map((track) => (
-                            <div key={track.id} className="recommendationItem p-4 border rounded-lg">
-                                <h4 className='text-sm font-semibold truncate'>{track.name}</h4>
+                            <div key={track.id} className="block text-center cursor-pointer border rounded-lg">
+                                <h4 className='text-sm font-semibold truncate p-2'>{track.name}</h4>
                                 <p className='text-sm truncate'>{track.artists[0].name}</p>
                                 <p className='text-sm truncate'><strong>Album:</strong> {track.album.name}</p>
-                                <img src={track.album.images[0].url} alt={track.name} className='m-2 w-full h-auto' />
+                                <img src={track.album.images[0].url} alt={track.name} className='m-auto p-4' onClick={() => handleTrackClick(track.id)} />
                             </div>
                         ))}
                     </div>
