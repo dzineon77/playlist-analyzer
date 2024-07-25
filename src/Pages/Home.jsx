@@ -32,7 +32,7 @@ async function requestUserAuth() {
   const { codeVerifier, codeChallenge } = await generateCodeChallenge();
 
   const clientId = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
-  const redirectUri = 'http://localhost:3000/analyze';
+  const redirectUri = 'https://playlist-analyzer.vercel.app/analyze';
   const scope = 'user-read-private user-read-email playlist-read-private';
   const authUrl = new URL("https://accounts.spotify.com/authorize");
   

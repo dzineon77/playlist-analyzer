@@ -5,7 +5,7 @@ import UserPanel from '../Components/UserPanel';
 import { useSpotifyAPI } from '../Components/useSpotifyAPI';
 
 const CLIENT_ID = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
-const REDIRECT_URI = 'http://localhost:3000/analyze';
+const REDIRECT_URI = 'https://playlist-analyzer.vercel.app/analyze';
 
 async function handleTokenResponse(response, setError) {
     const data = await response.json();
