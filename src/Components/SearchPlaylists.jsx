@@ -3,6 +3,7 @@ import Spotify_Logo from '../Assets/Spotify_logo_without_text.svg.png';
 import { SquareChevronLeft } from 'lucide-react';
 import FeatureCell from './FeatureCell';
 import { useSpotifyAPI } from './useSpotifyAPI';
+import { debounce } from 'lodash';
 
 export default function SearchPlaylists({ playlists }) {
 
@@ -14,6 +15,7 @@ export default function SearchPlaylists({ playlists }) {
 
     const { fetchFromSpotify } = useSpotifyAPI(accessToken);
 
+    // max # tracks returned is 100
     const getPlaylistData = async (playlistID) => {
         const data = await fetchFromSpotify(`playlists/${playlistID}`);
         if (data) {
@@ -58,6 +60,8 @@ export default function SearchPlaylists({ playlists }) {
         }
     };
 
+    const debouncedHandleFilter = debounce(handleFilter, 500);
+
     const parsePlaylistTracks = (trackList) => {
         const tracks = [];
 
@@ -69,6 +73,8 @@ export default function SearchPlaylists({ playlists }) {
         console.log(tracks);
         return tracks;
     };
+
+    const MemoizedFeatureCell = React.memo(FeatureCell);
 
     const handleTrackClick = (trackID) => {
         getTrackAudioFeatures(trackID);
@@ -92,7 +98,7 @@ export default function SearchPlaylists({ playlists }) {
                 <input
                     type="text"
                     id="myInput"
-                    onKeyUp={handleFilter}
+                    onKeyUp={debouncedHandleFilter}
                     placeholder="Search playlists ..."
                     className="w-full p-2 mb-4 border rounded" 
                 />
@@ -125,7 +131,7 @@ export default function SearchPlaylists({ playlists }) {
                 <input
                 type="text"
                 id="myInput"
-                onKeyUp={handleFilter}
+                onKeyUp={debouncedHandleFilter}
                 placeholder="Search tracks ..."
                 className="w-full p-2 mb-4 border rounded"
                 />
@@ -151,19 +157,19 @@ export default function SearchPlaylists({ playlists }) {
 
                 {trackAudioFeatures && (
                 <div className="trackAudioFeatures grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 my-8">
-                    <FeatureCell label="Mode" value={trackAudioFeatures.mode ? 'Major' : 'Minor'} useProgressBar={false} />
-                    <FeatureCell label="Tempo" value={`${trackAudioFeatures.tempo} bpm`} useProgressBar={false} />
-                    <FeatureCell label="Duration" value={`${Math.floor((trackAudioFeatures.duration_ms/1000)/60)}m ${Math.round((trackAudioFeatures.duration_ms/1000)%60,0)}s`} useProgressBar={false} />
-                    <FeatureCell label="Time Signature" value={trackAudioFeatures.time_signature} useProgressBar={false} />
+                    <MemoizedFeatureCell label="Mode" value={trackAudioFeatures.mode ? 'Major' : 'Minor'} useProgressBar={false} />
+                    <MemoizedFeatureCell label="Tempo" value={`${trackAudioFeatures.tempo} bpm`} useProgressBar={false} />
+                    <MemoizedFeatureCell label="Duration" value={`${Math.floor((trackAudioFeatures.duration_ms/1000)/60)}m ${Math.round((trackAudioFeatures.duration_ms/1000)%60,0)}s`} useProgressBar={false} />
+                    <MemoizedFeatureCell label="Time Signature" value={trackAudioFeatures.time_signature} useProgressBar={false} />
 
-                    <FeatureCell label="Danceability" value={trackAudioFeatures.danceability} />
-                    <FeatureCell label="Energy" value={trackAudioFeatures.energy} />
-                    <FeatureCell label="Speechiness" value={trackAudioFeatures.speechiness} />
-                    <FeatureCell label="Acousticness" value={trackAudioFeatures.acousticness} />
-                    <FeatureCell label="Instrumentalness" value={trackAudioFeatures.instrumentalness} />
-                    <FeatureCell label="Liveness" value={trackAudioFeatures.liveness} />
-                    <FeatureCell label="Valence" value={trackAudioFeatures.valence} />
-                    <FeatureCell label="Loudness" value={`${trackAudioFeatures.loudness} dB`} useProgressBar={false} />
+                    <MemoizedFeatureCell label="Danceability" value={trackAudioFeatures.danceability} />
+                    <MemoizedFeatureCell label="Energy" value={trackAudioFeatures.energy} />
+                    <MemoizedFeatureCell label="Speechiness" value={trackAudioFeatures.speechiness} />
+                    <MemoizedFeatureCell label="Acousticness" value={trackAudioFeatures.acousticness} />
+                    <MemoizedFeatureCell label="Instrumentalness" value={trackAudioFeatures.instrumentalness} />
+                    <MemoizedFeatureCell label="Liveness" value={trackAudioFeatures.liveness} />
+                    <MemoizedFeatureCell label="Valence" value={trackAudioFeatures.valence} />
+                    <MemoizedFeatureCell label="Loudness" value={`${trackAudioFeatures.loudness} dB`} useProgressBar={false} />
 
                 </div>
             )}

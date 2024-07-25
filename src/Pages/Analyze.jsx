@@ -67,6 +67,7 @@ export default function Analyze() {
 
     const { fetchFromSpotify } = useSpotifyAPI(accessToken);
 
+    // 50 is max
     const getPlaylists = async () => {
         const data = await fetchFromSpotify('me/playlists?limit=50');
         if (data) {
