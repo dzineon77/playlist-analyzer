@@ -72,7 +72,7 @@ export default function Analyze() {
 
             const data = await response.json();
             setPlaylists(data.items);
-            console.log(data.items);
+            // console.log(data.items);
             setError(null);
         } catch (error) {
             console.error('Error fetching playlists:', error);
