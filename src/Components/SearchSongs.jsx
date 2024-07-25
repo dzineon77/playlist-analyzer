@@ -1,64 +1,48 @@
 import React, { useState } from 'react';
 import FeatureCell from './FeatureCell';
+import Instructions from '../Assets/instructions.png';
+import { useSpotifyAPI } from './useSpotifyAPI';
 
 export default function SearchSongs() {
 
     const [trackData, setTrackData] = useState(null);
-    const [trackAF, setTrackAF] = useState(null);
+    const [trackAudioFeatures, settrackAudioFeatures] = useState(null);
     const [recommendations, setRecommendations] = useState(null);
     const [error, setError] = useState(null);
     const accessToken = sessionStorage.getItem('access_token');
 
-    const getTrackData = async (trackID) => {
-        try {
-            const response = await fetch(`https://api.spotify.com/v1/tracks/${trackID}`, {
-                headers: { 'Authorization': `Bearer ${accessToken}` }
-            });
+    const { fetchFromSpotify } = useSpotifyAPI(accessToken);
 
-            const data = await response.json();
-            console.log(data);
+    const getTrackData = async (trackID) => {
+        const data = await fetchFromSpotify(`tracks/${trackID}`);
+        if (data) {
             setTrackData(data);
             setError(null);
-        } catch (error) {
-            console.log('Error fetching track:', error);
+        } else {
             setTrackData([]);
-            setError("Failed to fetch track: " + error.message);
+            setError(`Failed to fetch track: ${error.message}`);
         }
     };
 
-    const getTrackAF = async (trackID) => {
-        try {
-            const response = await fetch(`https://api.spotify.com/v1/audio-features/${trackID}`, {
-                headers: { 'Authorization': `Bearer ${accessToken}` }
-            });
-
-            const data = await response.json();
-            console.log(data);
-            setTrackAF(data);
+    const getTrackAudioFeatures = async (trackID) => {
+        const data = await fetchFromSpotify(`audio-features/${trackID}`);
+        if (data) {
+            settrackAudioFeatures(data);
             setError(null);
-        } catch (error) {
-            console.log('Error fetching track:', error);
-            setTrackAF([]);
-            setError("Failed to fetch track: " + error.message);
+        } else {
+            settrackAudioFeatures([]);
+            setError(`Failed to fetch track audio features: ${error.message}`);
         }
     };
 
     const getRecommendations = async (trackID) => {
-        try {
-            const seed_tracks = [trackID];
-            const response = await fetch(`https://api.spotify.com/v1/recommendations?seed_tracks=${seed_tracks}&limit=3`, {
-                headers: { 'Authorization': `Bearer ${accessToken}` }
-            });
-
-            const data = await response.json();
-            console.log(data);
+        const data = await fetchFromSpotify(`recommendations?seed_tracks=${trackID}`);
+        if (data) {
             setRecommendations(data);
             setError(null);
-        } catch (error) {
-            console.log('Error fetching recommendations:', error);
-            console.log('Error fetching recommendations:', error.message);
+        } else {
             setRecommendations([]);
-            setError("Failed to fetch recommendations: " + error.message);
+            setError(`Failed to fetch recommendations: ${error.message}`);
         }
     }
 
@@ -72,7 +56,7 @@ export default function SearchSongs() {
         console.log(trackID);
         
         getTrackData(trackID);
-        getTrackAF(trackID);
+        getTrackAudioFeatures(trackID);
         getRecommendations(trackID);
 
         event.target.reset();
@@ -81,7 +65,7 @@ export default function SearchSongs() {
 
     const handleTrackClick = async (trackID) => {
         getTrackData(trackID);
-        getTrackAF(trackID);
+        getTrackAudioFeatures(trackID);
         getRecommendations(trackID);
     };
     
@@ -104,8 +88,12 @@ export default function SearchSongs() {
 
             </form>
 
+            {error && <p className="text-red-500">Error: {error}</p>}
 
-            {trackData && (
+            {trackData ? (
+
+                <>
+
                 <div className="trackData text-center">
                     <h3 className='font-bold text-4xl'>{trackData.name}</h3>
                     <p className='text-2xl'>{trackData.artists[0].name}</p>
@@ -114,6 +102,7 @@ export default function SearchSongs() {
                     
                     <div id='embed-iframe' className='flex justify-center'>
                         <iframe
+                            title='Spotify Player'
                             src={`https://open.spotify.com/embed/track/${trackData.id}`}
                             width="500"
                             height="400"
@@ -122,47 +111,54 @@ export default function SearchSongs() {
                             className='m-4'
                         ></iframe>
                     </div>
-
                 </div>
-            )}
 
+                {trackAudioFeatures && (
+                    <div className="trackAudioFeatures grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        <FeatureCell label="Mode" value={trackAudioFeatures.mode ? 'Major' : 'Minor'} useProgressBar={false} />
+                        <FeatureCell label="Tempo" value={`${trackAudioFeatures.tempo} bpm`} useProgressBar={false} />
+                        <FeatureCell label="Duration" value={`${Math.floor((trackAudioFeatures.duration_ms/1000)/60)}m ${Math.round((trackAudioFeatures.duration_ms/1000)%60,0)}s`} useProgressBar={false} />
+                        <FeatureCell label="Time Signature" value={trackAudioFeatures.time_signature} useProgressBar={false} />
 
-            {trackAF && (
-                <div className="trackAF grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    <FeatureCell label="Mode" value={trackAF.mode ? 'Major' : 'Minor'} useProgressBar={false} />
-                    <FeatureCell label="Tempo" value={`${trackAF.tempo} bpm`} useProgressBar={false} />
-                    <FeatureCell label="Duration" value={`${Math.floor((trackAF.duration_ms/1000)/60)}m ${Math.round((trackAF.duration_ms/1000)%60,0)}s`} useProgressBar={false} />
-                    <FeatureCell label="Time Signature" value={trackAF.time_signature} useProgressBar={false} />
+                        <FeatureCell label="Danceability" value={trackAudioFeatures.danceability} />
+                        <FeatureCell label="Energy" value={trackAudioFeatures.energy} />
+                        <FeatureCell label="Speechiness" value={trackAudioFeatures.speechiness} />
+                        <FeatureCell label="Acousticness" value={trackAudioFeatures.acousticness} />
+                        <FeatureCell label="Instrumentalness" value={trackAudioFeatures.instrumentalness} />
+                        <FeatureCell label="Liveness" value={trackAudioFeatures.liveness} />
+                        <FeatureCell label="Valence" value={trackAudioFeatures.valence} />
+                        <FeatureCell label="Loudness" value={`${trackAudioFeatures.loudness} dB`} useProgressBar={false} />
 
-                    <FeatureCell label="Danceability" value={trackAF.danceability} />
-                    <FeatureCell label="Energy" value={trackAF.energy} />
-                    <FeatureCell label="Speechiness" value={trackAF.speechiness} />
-                    <FeatureCell label="Acousticness" value={trackAF.acousticness} />
-                    <FeatureCell label="Instrumentalness" value={trackAF.instrumentalness} />
-                    <FeatureCell label="Liveness" value={trackAF.liveness} />
-                    <FeatureCell label="Valence" value={trackAF.valence} />
-                    <FeatureCell label="Loudness" value={`${trackAF.loudness} dB`} useProgressBar={false} />
-
-                </div>
-            )}
-            
-            {recommendations && (
-                <div className="recommendations mt-4">
-                    <h3 className='font-bold text-2xl mb-4'>Recommended Tracks</h3>
-                    <div className="recommendationList grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        {recommendations.tracks.slice(0, 3).map((track) => (
-                            <div key={track.id} className="block text-center cursor-pointer border rounded-lg">
-                                <h4 className='text-sm font-semibold truncate p-2'>{track.name}</h4>
-                                <p className='text-sm truncate'><strong>{track.artists[0].name}</strong></p>
-                                <p className='text-sm truncate px-2'><strong>Album:</strong> {track.album.name}</p>
-                                <img src={track.album.images[0].url} alt={track.name} className='m-auto p-4' onClick={() => handleTrackClick(track.id)} />
-                            </div>
-                        ))}
                     </div>
-                </div>
-            )}
+                )}
 
-            {error && <p className="text-red-500">Error: {error}</p>}
+                {recommendations && (
+                    <div className="recommendations mt-4">
+                        <h3 className='font-bold text-2xl mb-4'>Recommended Tracks</h3>
+                        <div className="recommendationList grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            {recommendations.tracks.slice(0, 3).map((track) => (
+                                <div key={track.id} className="block text-center cursor-pointer border rounded-lg">
+                                    <h4 className='text-sm font-semibold truncate p-2'>{track.name}</h4>
+                                    <p className='text-sm truncate'><strong>{track.artists[0].name}</strong></p>
+                                    <p className='text-sm truncate px-2'><strong>Album:</strong> {track.album.name}</p>
+                                    <img src={track.album.images[0].url} alt={track.name} className='m-auto p-4' onClick={() => handleTrackClick(track.id)} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                </>
+
+            ) : (
+                <>
+                <div className="Instructions text-center">
+                    <p className="text-center mt-4 font-semibold">Find a track and copy song link as shown</p>
+                    <img src={Instructions} alt="Instructions" className='m-auto' />
+                </div>
+                </>
+            )
+            }
 
         </div>
     );

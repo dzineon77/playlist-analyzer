@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import SearchPlaylists from '../Components/SearchPlaylists';
 import SearchSongs from '../Components/SearchSongs';
 import UserPanel from '../Components/UserPanel';
+import { useSpotifyAPI } from '../Components/useSpotifyAPI';
 
 const CLIENT_ID = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
 const REDIRECT_URI = 'http://localhost:3000/analyze';
@@ -12,7 +13,7 @@ async function handleTokenResponse(response, setError) {
         sessionStorage.setItem('access_token', data.access_token);
         return data.access_token;
     } else {
-        setError("Failed to obtain access token. Error: " + (data.error || "Unknown error"));
+        console.log(`Failed to obtain access token. Error: ${data.error}`);
         return null;
     }
 }
@@ -50,7 +51,7 @@ async function getOrRefreshToken(setError) {
                 return handleTokenResponse(response, setError);
             } catch (error) {
                 console.log('Failed to exchange code for access token:', error);
-                setError("Failed to exchange code for access token: " + error.message);
+                setError(`Failed to exchange code for access token: ${error.message}`);
                 return null;
             }
         }
@@ -64,39 +65,29 @@ export default function Analyze() {
     const [userProfileData, setUserProfileData] = useState(null);
     const [error, setError] = useState(null);
 
-    const getPlaylists = async () => {
-        try {
-            const response = await fetch('https://api.spotify.com/v1/me/playlists?limit=35', {
-                headers: { 'Authorization': `Bearer ${accessToken}` }
-            });
+    const { fetchFromSpotify } = useSpotifyAPI(accessToken);
 
-            const data = await response.json();
+    const getPlaylists = async () => {
+        const data = await fetchFromSpotify('me/playlists?limit=50');
+        if (data) {
             setPlaylists(data.items);
-            // console.log(data.items);
             setError(null);
-        } catch (error) {
-            console.error('Error fetching playlists:', error);
+        } else {
             setPlaylists([]);
-            setError("Failed to fetch playlists: " + error.message);
+            setError(`Failed to fetch playlist: ${error.message}`);
         }
     };
 
     const getUserProfile = async () => {
-    
-        try {
-          const response = await fetch('https://api.spotify.com/v1/me', {
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-          });
-    
-          const data = await response.json();
-          setUserProfileData(data);
-          setError(null);
-        } catch (error) {
-          console.error('Error fetching user profile:', error);
-          setUserProfileData(null);
-          setError("Failed to fetch user profile: " + error.message);
+        const data = await fetchFromSpotify('me');
+        if (data) {
+            setUserProfileData(data);
+            setError(null);
+        } else {
+            setUserProfileData([]);
+            setError(`Failed to fetch user profile: ${error.message}`);
         }
-      };
+    };
 
     const handleToggleChange = () => setIsToggled(!isToggled);
 

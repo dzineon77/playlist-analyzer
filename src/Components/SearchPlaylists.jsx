@@ -2,14 +2,45 @@ import React, { useState } from 'react';
 import Spotify_Logo from '../Assets/Spotify_logo_without_text.svg.png';
 import { SquareChevronLeft } from 'lucide-react';
 import FeatureCell from './FeatureCell';
+import { useSpotifyAPI } from './useSpotifyAPI';
 
 export default function SearchPlaylists({ playlists }) {
 
-    const [selectedPlaylist, setselectedPlaylist] = useState(null);
-    const [selectedPlaylistTracks, setselectedPlaylistTracks] = useState(null);
-    const [trackAF, setTrackAF] = useState(null);
+    const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+    const [selectedPlaylistTracks, setSelectedPlaylistTracks] = useState(null);
+    const [trackAudioFeatures, setTrackAudioFeatures] = useState(null);
     const [error, setError] = useState(null);
     const accessToken = sessionStorage.getItem('access_token');
+
+    const { fetchFromSpotify } = useSpotifyAPI(accessToken);
+
+    const getPlaylistData = async (playlistID) => {
+        const data = await fetchFromSpotify(`playlists/${playlistID}`);
+        if (data) {
+            setSelectedPlaylist(data);
+            setSelectedPlaylistTracks(parsePlaylistTracks(data.tracks.items));
+            setError(null);
+        } else {
+            setSelectedPlaylist([]);
+            setSelectedPlaylistTracks([]);
+            setError(`Failed to fetch playlist: ${error.message}`);
+        }
+    }
+
+    const getTrackAudioFeatures = async (trackID) => {
+        const data = await fetchFromSpotify(`audio-features/${trackID}`);
+        if (data) {
+            setTrackAudioFeatures(data);
+            setError(null);
+        } else {
+            setTrackAudioFeatures([]);
+            setError(`Failed to fetch track audio features: ${error.message}`);
+        }
+    };
+    
+    const handlePlaylistClick = (playlistID) => {
+        getPlaylistData(playlistID);
+    };
 
     const handleFilter = (event) => {
         const filter = event.target.value.toUpperCase();
@@ -27,45 +58,6 @@ export default function SearchPlaylists({ playlists }) {
         }
     };
 
-    const getPlaylistData = async (playlistID) => {
-        try {
-            const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistID}`, {
-                headers: { 'Authorization': `Bearer ${accessToken}` }
-            });
-
-            const data = await response.json();
-            // console.log(data.tracks.items);  
-            setselectedPlaylist(data);
-            setselectedPlaylistTracks(parsePlaylistTracks(data.tracks.items));
-            setError(null);
-        } catch (error) {
-            console.log('Error fetching playlist:', error);
-            setselectedPlaylist([]);
-            setselectedPlaylistTracks([]);
-            setError("Failed to fetch playlist: " + error.message);
-        }
-    }
-
-    const getTrackAF = async (trackID) => {
-        try {
-            const response = await fetch(`https://api.spotify.com/v1/audio-features/${trackID}`, {
-                headers: { 'Authorization': `Bearer ${accessToken}` }
-            });
-
-            const data = await response.json();
-            setTrackAF(data);
-            setError(null);
-        } catch (error) {
-            console.log('Error fetching track:', error);
-            setTrackAF([]);
-            setError("Failed to fetch track: " + error.message);
-        }
-    };
-    
-    const handlePlaylistClick = (playlistID) => {
-        getPlaylistData(playlistID);
-    };
-
     const parsePlaylistTracks = (trackList) => {
         const tracks = [];
 
@@ -79,13 +71,13 @@ export default function SearchPlaylists({ playlists }) {
     };
 
     const handleTrackClick = (trackID) => {
-        getTrackAF(trackID);
+        getTrackAudioFeatures(trackID);
     };
 
     const returnToMenu = () => {
-        setselectedPlaylist(null);
-        setselectedPlaylistTracks(null);
-        setTrackAF(null);
+        setSelectedPlaylist(null);
+        setSelectedPlaylistTracks(null);
+        setTrackAudioFeatures(null);
     };
 
     
@@ -157,21 +149,21 @@ export default function SearchPlaylists({ playlists }) {
                     </ul>
                 </div>
 
-                {trackAF && (
-                <div className="trackAF grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 my-8">
-                    <FeatureCell label="Mode" value={trackAF.mode ? 'Major' : 'Minor'} useProgressBar={false} />
-                    <FeatureCell label="Tempo" value={`${trackAF.tempo} bpm`} useProgressBar={false} />
-                    <FeatureCell label="Duration" value={`${Math.floor((trackAF.duration_ms/1000)/60)}m ${Math.round((trackAF.duration_ms/1000)%60,0)}s`} useProgressBar={false} />
-                    <FeatureCell label="Time Signature" value={trackAF.time_signature} useProgressBar={false} />
+                {trackAudioFeatures && (
+                <div className="trackAudioFeatures grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 my-8">
+                    <FeatureCell label="Mode" value={trackAudioFeatures.mode ? 'Major' : 'Minor'} useProgressBar={false} />
+                    <FeatureCell label="Tempo" value={`${trackAudioFeatures.tempo} bpm`} useProgressBar={false} />
+                    <FeatureCell label="Duration" value={`${Math.floor((trackAudioFeatures.duration_ms/1000)/60)}m ${Math.round((trackAudioFeatures.duration_ms/1000)%60,0)}s`} useProgressBar={false} />
+                    <FeatureCell label="Time Signature" value={trackAudioFeatures.time_signature} useProgressBar={false} />
 
-                    <FeatureCell label="Danceability" value={trackAF.danceability} />
-                    <FeatureCell label="Energy" value={trackAF.energy} />
-                    <FeatureCell label="Speechiness" value={trackAF.speechiness} />
-                    <FeatureCell label="Acousticness" value={trackAF.acousticness} />
-                    <FeatureCell label="Instrumentalness" value={trackAF.instrumentalness} />
-                    <FeatureCell label="Liveness" value={trackAF.liveness} />
-                    <FeatureCell label="Valence" value={trackAF.valence} />
-                    <FeatureCell label="Loudness" value={`${trackAF.loudness} dB`} useProgressBar={false} />
+                    <FeatureCell label="Danceability" value={trackAudioFeatures.danceability} />
+                    <FeatureCell label="Energy" value={trackAudioFeatures.energy} />
+                    <FeatureCell label="Speechiness" value={trackAudioFeatures.speechiness} />
+                    <FeatureCell label="Acousticness" value={trackAudioFeatures.acousticness} />
+                    <FeatureCell label="Instrumentalness" value={trackAudioFeatures.instrumentalness} />
+                    <FeatureCell label="Liveness" value={trackAudioFeatures.liveness} />
+                    <FeatureCell label="Valence" value={trackAudioFeatures.valence} />
+                    <FeatureCell label="Loudness" value={`${trackAudioFeatures.loudness} dB`} useProgressBar={false} />
 
                 </div>
             )}
