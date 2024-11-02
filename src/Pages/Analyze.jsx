@@ -3,8 +3,11 @@ import SearchPlaylists from '../Components/SearchPlaylists';
 import SearchSongs from '../Components/SearchSongs';
 import UserPanel from '../Components/UserPanel';
 import { useSpotifyAPI } from '../Components/useSpotifyAPI';
+import BackgroundGradient from '../Components/BackgroundGradient';
+import { useNavigate } from 'react-router-dom';
 
 const CLIENT_ID = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
+
 const REDIRECT_URI = 'https://playlist-analyzer.vercel.app/analyze';
 
 async function handleTokenResponse(response, setError) {
@@ -58,14 +61,48 @@ async function getOrRefreshToken(setError) {
     }
 }
 
+// Wrapper component to handle auth redirect (error=access_denied)
+function AuthRedirectHandler({ children }) {
+    const navigate = useNavigate();
+    
+    useEffect(() => {
+        if (window.location.href.includes('error=access_denied')) {
+            sessionStorage.clear();
+            navigate('/?auth_error=access_denied');
+        }
+    }, [navigate]);
+
+    if (window.location.href.includes('error=access_denied')) {
+        return null;
+    }
+
+    return children;
+}
+
 export default function Analyze() {
+
     const [accessToken, setAccessToken] = useState(sessionStorage.getItem('access_token'));
     const [isToggled, setIsToggled] = useState(false);
     const [playlists, setPlaylists] = useState([]);
     const [userProfileData, setUserProfileData] = useState(null);
     const [error, setError] = useState(null);
-
     const { fetchFromSpotify } = useSpotifyAPI(accessToken);
+
+    useEffect(() => {
+        async function initializeToken() {
+            const token = await getOrRefreshToken(setError);
+            setAccessToken(token);
+        }
+        initializeToken();
+    }, []);
+
+    useEffect(() => {
+        if (accessToken) {
+            getUserProfile();
+            getPlaylists();
+        }
+        //eslint-disable-next-line
+    }, [accessToken]);
 
     // 50 is max
     const getPlaylists = async () => {
@@ -92,52 +129,44 @@ export default function Analyze() {
 
     const handleToggleChange = () => setIsToggled(!isToggled);
 
-    useEffect(() => {
-        async function initializeToken() {
-            const token = await getOrRefreshToken(setError);
-            setAccessToken(token);
-        }
-        initializeToken();
-    }, []);
-
-    useEffect(() => {
-        if (accessToken) {
-            getPlaylists();
-            getUserProfile();
-        }
-        //eslint-disable-next-line
-    }, [accessToken]);
-
     return (
-        <>
-        <UserPanel userData={userProfileData}/>        
-        <div className='min-h-screen bg-green-light flex items-center justify-center p-10'>
-            <div className="w-3/4 bg-white rounded-lg shadow-xl p-8">
-                <div className="header bg-white-light rounded-lg shadow-xl p-8 m-10">
-                    <h1 className='text-4xl font-bold'>Playlist Analyzer</h1>
-                    {error && <p className="text-red-500">Error: {error}</p>}
-                </div>
+        <AuthRedirectHandler>
+        <div className="relative min-h-screen">
+            <BackgroundGradient />
+            
+            {/* User Panel */}
+            <div className="relative">
+                <UserPanel userData={userProfileData}/>
+            </div>
+            
+            {/* Main Content */}
+            <div className='relative z-10 min-h-screen flex items-center justify-center p-10'>
+                <div className="w-3/4 bg-white/80 backdrop-blur-sm rounded-lg shadow-xl p-8">
+                    <div className="header bg-white-light/90 backdrop-blur-sm rounded-lg shadow-xl p-8 m-10">
+                        <h1 className='text-4xl font-bold'>Playlist Analyzer</h1>
+                        {error && <p className="text-red-500">Error: {error}</p>}
+                    </div>
 
-                <div className="grid justify-items-center bg-white-light rounded-lg shadow-xl p-8 ">
-                    <input
-                        type="checkbox"
-                        id="toggle"
-                        className="toggleCheckbox"
-                        onChange={handleToggleChange}
-                        checked={isToggled}
-                    />
-                    <label htmlFor="toggle" className="toggleContainer">
-                        <div>Search Songs</div>
-                        <div>Your Playlists</div>
-                    </label>
+                    <div className="grid justify-items-center bg-white-light/90 backdrop-blur-sm rounded-lg shadow-xl p-8">
+                        <input
+                            type="checkbox"
+                            id="toggle"
+                            className="toggleCheckbox"
+                            onChange={handleToggleChange}
+                            checked={isToggled}
+                        />
+                        <label htmlFor="toggle" className="toggleContainer">
+                            <div>Search Songs</div>
+                            <div>Your Playlists</div>
+                        </label>
 
-                    <div className="results min-w-full">
-                        {isToggled ? <SearchPlaylists playlists={playlists}/> : <SearchSongs />}
+                        <div className="results min-w-full">
+                            {isToggled ? <SearchPlaylists playlists={playlists}/> : <SearchSongs />}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        </>
+        </AuthRedirectHandler>
     );
 }

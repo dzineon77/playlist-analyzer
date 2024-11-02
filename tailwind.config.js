@@ -7,7 +7,30 @@ module.exports = {
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+          '33%': { transform: 'translate(1rem, 1rem) scale(1.05)' },
+          '66%': { transform: 'translate(-1rem, -0.5rem) scale(0.95)' },
+        },
+        'float-delayed': {
+          '0%, 100%': { transform: 'translate(0, 0) scale(1.05)' },
+          '33%': { transform: 'translate(-1rem, 1rem) scale(1)' },
+          '66%': { transform: 'translate(1rem, -0.5rem) scale(1.05)' },
+        },
+        'float-slow': {
+          '0%, 100%': { transform: 'translate(0, 0) scale(0.95)' },
+          '33%': { transform: 'translate(1rem, -1rem) scale(1)' },
+          '66%': { transform: 'translate(-1rem, 0.5rem) scale(0.95)' },
+        },
+      },
+      animation: {
+        'float': 'float 20s ease-in-out infinite',
+        'float-delayed': 'float-delayed 25s ease-in-out infinite',
+        'float-slow': 'float-slow 30s ease-in-out infinite',
+      },
+    },
     colors: {
       transparent: 'transparent',
       current: 'currentColor',

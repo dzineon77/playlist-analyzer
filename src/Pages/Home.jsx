@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Music, ArrowBigRightDash, SquareChevronLeft, Volume2, Mic2, Activity, Timer, Zap, Speech } from 'lucide-react';
+import BackgroundGradient from '../Components/BackgroundGradient';
+import FeatureBar from '../Components/FeatureBar';
+import SongCard from '../Components/SongCard';
+import Alert from '../Components/Alert';
+import { useLocation } from 'react-router-dom';
 
 // Import all demo song cover images
 import song1Cover from '../Assets/DemoSongIcons/StayinAlive.jpeg'; 
 import song2Cover from '../Assets/DemoSongIcons/StrangeLand.jpeg';
 import song3Cover from '../Assets/DemoSongIcons/MortalMan.jpeg';
 
-// Simulated song data with audio features
+// Demo song data with audio features
 const DEMO_SONGS = [
   {
     id: 1,
@@ -52,41 +57,8 @@ const DEMO_SONGS = [
   }
 ];
 
-const FeatureBar = ({ value, label, icon: Icon }) => (
-  <div className="mb-2">
-    <div className="flex items-center mb-1">
-      <Icon size={16} className="mr-2 text-green-600" />
-      <span className="text-lg text-gray-600">{label}</span>
-      <span className="ml-auto text-lg font-medium">{Math.round(value * 100)}%</span>
-    </div>
-    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-      <div 
-        className="h-full bg-green-500 rounded-full transition-all duration-500 ease-out"
-        style={{ width: `${value * 100}%` }}
-      />
-    </div>
-  </div>
-);
-
-const SongCard = ({ song, isSelected, onClick }) => (
-  <div 
-    className={`min-w-[150px] p-5 rounded-lg cursor-pointer transition-all duration-300 transform hover:scale-103 ${
-      isSelected ? 'bg-green shadow-lg' : 'bg-gray'
-    }`}
-    onClick={onClick}
-  >
-    <div className="w-full aspect-square mb-3 rounded-lg overflow-hidden">
-      <img 
-        src={song.coverImage} 
-        alt={`${song.title} cover`}
-        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-      />
-    </div>
-    <h3 className="font-semibold text-gray-800 truncate">{song.title}</h3>
-    <p className="text-sm text-gray-600">{song.artist}</p>
-  </div>
-);
-
+// Necessary for authorization code flow, following PKCE encryption standard
+// https://developer.spotify.com/documentation/web-api/tutorials/code-pkce-flow
 async function generateCodeChallenge() {
   const generateRandomString = (length) => {
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -115,6 +87,8 @@ async function generateCodeChallenge() {
   return { codeVerifier, codeChallenge };
 }
 
+// Use SHA256 hashed codeChallenge to request an access token
+// Change redirectUri here for proper navigation 
 async function requestUserAuth() {
   const { codeVerifier, codeChallenge } = await generateCodeChallenge();
 
@@ -144,10 +118,21 @@ async function requestUserAuth() {
 }
 
 function Home() {
-  // State to manage whether to show the sliding window
+  
+  // State to manage whether to show the demo and select a song
   const [showSlider, setShowSlider] = useState(false);
   const [selectedSong, setSelectedSong] = useState(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('auth_error') === 'access_denied') {
+      setShowAlert(true);
+      window.history.replaceState({}, '', '/');
+    }
+  }, [location]);
 
   useEffect(() => {
     if (selectedSong) {
@@ -158,22 +143,32 @@ function Home() {
   }, [selectedSong]);
     
   return (
-    <div className="min-h-screen bg-green-light flex items-center justify-center p-4">
-      <div className="bg-white-light rounded-lg shadow-xl p-8 max-w-3xl w-full">
+    <div className="relative min-h-screen">
+      <BackgroundGradient />
+      
+      {showAlert && (
+        <Alert
+          title="Access Denied"
+          message="You've denied access to Spotify. Please try connecting again."
+          onClose={() => setShowAlert(false)}
+        />
+      )}
 
-        {showSlider ? (
-          <div className="demo-content relative">
+      <div className="relative min-h-screen flex items-center justify-center p-4">
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-xl p-8 max-w-3xl w-full">
+          {showSlider ? (
+            <div className="demo-content">
 
-            <button
-              onClick={() => setShowSlider(false)}
-              className="mb-6 p-2 text-gray-600 hover:text-gray-800 transition-colors"
-            >
-              <SquareChevronLeft className='absolute top-4 left-4' size={32} />
-            </button>
+              <button
+                onClick={() => setShowSlider(false)}
+                className="mb-6 p-4 absolute top-4 left-4 text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                <SquareChevronLeft size={32} />
+              </button>
 
             <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Audio Feature Analysis Demo</h2>
-              <p className="text-gray-600">Select a song to see its audio features</p>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Audio Features Analysis</h2>
+              <p className="text-gray-600">Select a song to get started</p>
             </div>
 
             <div className="flex space-x-4 mb-8 overflow-x-auto justify-center pb-4">
@@ -190,7 +185,7 @@ function Home() {
             {selectedSong && (
               <div className={`transition-opacity duration-500 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
                 <h3 className="text-xl font-semibold mb-4 text-gray-800">
-                  {selectedSong.title} - Audio Features
+                  {selectedSong.title} - {selectedSong.artist}
                 </h3>
                 <div className="space-y-4">
                   <FeatureBar value={selectedSong.features.energy} label="Energy" icon={Zap} />
@@ -210,42 +205,42 @@ function Home() {
 
           </div>
         ) : (
-          <div className="main-content">
+            <div className="main-content">
+              <div className="text-center mb-8">
+                <Music className="mx-auto text-green-500 mb-4" size={48} />
+                <h1 className="text-4xl font-bold text-gray-800 mb-2">Playlist Analyzer</h1>
+                <p className="text-gray-600">Discover insights about your music by exploring audio features and trends</p>
+              </div>
 
-            <div className="text-center mb-8">
-              <Music className="mx-auto text-green-500 mb-4" size={48} />
-              <h1 className="text-4xl font-bold text-gray-800 mb-2">Playlist Analyzer</h1>
-              <p className="text-gray-600">Discover insights about your music by exploring audio features and trends</p>
-            </div>
-
-            <div className="space-y-6">
-              <button
-                className="w-full bg-green-dark hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
-                onClick={() => setShowSlider(true)}
-              >
-                <div className="flex items-center justify-center space-x-2">
-                  <span>Try the Demo</span>
-                  <ArrowBigRightDash className="w-5 h-5" />
-                </div>
-              </button>
-
-              <div className="bg-gray-100 rounded-lg p-4 flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-800">Ready to explore?</h2>
-                  <p className="text-sm text-gray-600">Connect your Spotify account to get started</p>
-                </div>
+              <div className="space-y-6">
                 <button
-                  className="bg-green-dark hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out transform hover:scale-105"
-                  onClick={requestUserAuth}
+                  className="w-full bg-green-dark hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
+                  onClick={() => setShowSlider(true)}
                 >
-                  Connect
+                  <div className="flex items-center justify-center space-x-2">
+                    <span>Try the Demo</span>
+                    <ArrowBigRightDash className="w-5 h-5" />
+                  </div>
                 </button>
+
+                <div className="bg-gray backdrop-blur-sm rounded-lg p-4 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-800">Ready to explore?</h2>
+                    <p className="text-sm text-gray-600">Connect your Spotify account to get started</p>
+                  </div>
+                  <button
+                    className="bg-green-dark hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out transform hover:scale-105"
+                    onClick={requestUserAuth}
+                  >
+                    Connect
+                  </button>
               </div>
             </div>
 
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 };
