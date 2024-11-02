@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Music, ArrowBigRightDash, SquareChevronLeft, Volume2, Mic2, Activity, Timer, Zap, Speech } from 'lucide-react';
+import { ArrowBigRightDash, SquareChevronLeft, Volume2, Mic2, Activity, Timer, Zap, Speech } from 'lucide-react';
 import BackgroundGradient from '../Components/BackgroundGradient';
 import FeatureBar from '../Components/FeatureBar';
 import SongCard from '../Components/SongCard';
@@ -10,6 +10,7 @@ import { useLocation } from 'react-router-dom';
 import song1Cover from '../Assets/DemoSongIcons/StayinAlive.jpeg'; 
 import song2Cover from '../Assets/DemoSongIcons/StrangeLand.jpeg';
 import song3Cover from '../Assets/DemoSongIcons/MortalMan.jpeg';
+import Spotify_Logo from '../Assets/Spotify_logo_without_text.svg.png';
 
 // Demo song data with audio features
 const DEMO_SONGS = [
@@ -206,8 +207,8 @@ function Home() {
           </div>
         ) : (
             <div className="main-content">
-              <div className="text-center mb-8">
-                <Music className="mx-auto text-green-500 mb-4" size={48} />
+              <div className="justify-center text-center mb-8">
+                <img className="w-36 h-36 object-cover justify-self-center mb-4" src={Spotify_Logo} alt='Spotify Logo'></img>
                 <h1 className="text-4xl font-bold text-gray-800 mb-2">Playlist Analyzer</h1>
                 <p className="text-gray-600">Discover insights about your music by exploring audio features and trends</p>
               </div>
