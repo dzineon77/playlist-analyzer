@@ -5,10 +5,12 @@ import UserPanel from '../Components/UserPanel';
 import { useSpotifyAPI } from '../Components/useSpotifyAPI';
 import BackgroundGradient from '../Components/BackgroundGradient';
 import { useNavigate } from 'react-router-dom';
+import Toggle from '../Components/Toggle';
 
 const CLIENT_ID = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
 
-const REDIRECT_URI = 'https://playlist-analyzer.vercel.app/analyze';
+// const REDIRECT_URI = 'https://playlist-analyzer.vercel.app/analyze';
+const REDIRECT_URI = 'http://localhost:3000/analyze';
 
 async function handleTokenResponse(response, setError) {
     const data = await response.json();
@@ -141,26 +143,17 @@ export default function Analyze() {
             
             {/* Main Content */}
             <div className='relative z-10 min-h-screen flex items-center justify-center p-10'>
-                <div className="w-3/4 bg-white/80 backdrop-blur-sm rounded-lg shadow-xl p-8">
-                    <div className="header bg-white-light/90 backdrop-blur-sm rounded-lg shadow-xl p-8 m-10">
-                        <h1 className='text-4xl font-bold'>Playlist Analyzer</h1>
-                        {error && <p className="text-red-500">Error: {error}</p>}
+                <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-xl p-4 md:p-8 max-w-3xl w-full mx-4">
+                    <div className="header bg-white-light/90 backdrop-blur-sm rounded-lg shadow-xl p-4 md:p-8 m-4 md:m-10">
+                        <h1 className='text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-center'>Playlist Analyzer</h1>
+                        {error && <p className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-center text-red-500">Error: {error}</p>}
                     </div>
 
-                    <div className="grid justify-items-center bg-white-light/90 backdrop-blur-sm rounded-lg shadow-xl p-8">
-                        <input
-                            type="checkbox"
-                            id="toggle"
-                            className="toggleCheckbox"
-                            onChange={handleToggleChange}
-                            checked={isToggled}
-                        />
-                        <label htmlFor="toggle" className="toggleContainer">
-                            <div>Search Songs</div>
-                            <div>Your Playlists</div>
-                        </label>
+                    <div className="grid justify-items-center bg-white-light/90 backdrop-blur-sm rounded-lg shadow-xl p-4 md:p-8">
+                        
+                        <Toggle isToggled={isToggled} onToggle={handleToggleChange} />
 
-                        <div className="results min-w-full">
+                        <div className="results content-center">
                             {isToggled ? <SearchPlaylists playlists={playlists}/> : <SearchSongs />}
                         </div>
                     </div>

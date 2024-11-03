@@ -1,22 +1,28 @@
-const SongCard = ({ song, isSelected, onClick }) => (
-  <>
-    <div 
-      className={`min-w-[150px] p-5 rounded-lg cursor-pointer transition-all duration-300 transform hover:scale-103 ${
-        isSelected ? 'bg-green shadow-lg' : 'bg-gray'
-      }`}
+const SongCard = ({ song, isSelected, onClick }) => {
+  return (
+    <div
+      className={`
+        w-full md:w-48 p-4 rounded-lg cursor-pointer transition-all duration-300
+        ${isSelected 
+          ? 'bg-green shadow-lg scale-105' 
+          : 'bg-gray hover:bg-white/80 shadow hover:shadow-md'
+        }
+      `}
       onClick={onClick}
     >
-      <div className="w-full aspect-square mb-3 rounded-lg overflow-hidden">
-        <img 
-          src={song.coverImage} 
-          alt={`${song.title} cover`}
-          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-        />
-      </div>
-      <h3 className="font-semibold text-gray-800 truncate">{song.title}</h3>
-      <p className="text-sm text-gray-600">{song.artist}</p>
+      <img
+        src={song.coverImage}
+        alt={`${song.title} cover`}
+        className="w-full h-32 md:h-40 object-cover rounded-md mb-3"
+      />
+      <h3 className="font-semibold text-sm md:text-base text-gray-800 truncate">
+        {song.title}
+      </h3>
+      <p className="text-xs md:text-sm text-gray-600 truncate">
+        {song.artist}
+      </p>
     </div>
-    </>
   );
+};
 
-  export default SongCard;
+export default SongCard;

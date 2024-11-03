@@ -95,7 +95,8 @@ async function requestUserAuth() {
 
   const clientId = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
 
-  const redirectUri = 'https://playlist-analyzer.vercel.app/analyze';
+  // const redirectUri = 'https://playlist-analyzer.vercel.app/analyze';
+  const redirectUri = 'http://localhost:3000/analyze';
 
   const scope = 'user-read-private user-read-email playlist-read-private';
   const authUrl = new URL("https://accounts.spotify.com/authorize");
@@ -156,23 +157,24 @@ function Home() {
       )}
 
       <div className="relative min-h-screen flex items-center justify-center p-4">
-        <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-xl p-8 max-w-3xl w-full">
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-xl p-4 md:p-8 max-w-3xl w-full mx-4">
           {showSlider ? (
             <div className="demo-content">
 
               <button
                 onClick={() => setShowSlider(false)}
-                className="mb-6 p-4 absolute top-4 left-4 text-gray-600 hover:text-gray-800 transition-colors"
+                className="mb-6 p-2 md:p-4 absolute top-2 left-2 md:top-4 md:left-4 text-gray-600 hover:text-gray-800 transition-colors"
               >
-                <SquareChevronLeft size={32} />
-              </button>
+                <SquareChevronLeft size={24} className="md:w-8 md:h-8" />
+                </button>
 
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Audio Features Analysis</h2>
-              <p className="text-gray-600">Select a song to get started</p>
-            </div>
+                <div className="mb-4 md:mb-8">
+                <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">Audio Features Analysis</h2>
+                <p className="text-sm md:text-base text-gray-600">Select a song to get started</p>
+              </div>
 
-            <div className="flex space-x-4 mb-8 overflow-x-auto justify-center pb-4">
+            <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-2 md:overflow-x-auto justify-start md:justify-center pb-4">
+
               {DEMO_SONGS.map(song => (
                 <SongCard
                   key={song.id}
@@ -207,10 +209,10 @@ function Home() {
           </div>
         ) : (
             <div className="main-content">
-              <div className="justify-center text-center mb-8">
-                <img className="w-36 h-36 object-cover justify-self-center mb-4" src={Spotify_Logo} alt='Spotify Logo'></img>
-                <h1 className="text-4xl font-bold text-gray-800 mb-2">Playlist Analyzer</h1>
-                <p className="text-gray-600">Discover insights about your music by exploring audio features and trends</p>
+              <div className="text-center mb-6 md:mb-8">
+                <img className="w-36 h-36 object-cover justify-self-center mb-2 md:mb-4" src={Spotify_Logo} alt='Spotify Logo'></img>
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Playlist Analyzer</h1>
+                <p className="text-sm md:text-base text-gray-600 px-4">Discover insights about your music by exploring audio features and trends</p>
               </div>
 
               <div className="space-y-6">
@@ -226,8 +228,8 @@ function Home() {
 
                 <div className="bg-gray backdrop-blur-sm rounded-lg p-4 flex items-center justify-between">
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-800">Ready to explore?</h2>
-                    <p className="text-sm text-gray-600">Connect your Spotify account to get started</p>
+                    <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Ready to explore?</h2>
+                    <p className="text-sm md:text-base text-gray-600 px-4">Connect your Spotify account to get started</p>
                   </div>
                   <button
                     className="bg-green-dark hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out transform hover:scale-105"

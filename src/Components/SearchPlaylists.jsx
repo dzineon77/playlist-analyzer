@@ -88,38 +88,40 @@ export default function SearchPlaylists({ playlists }) {
 
     
     return (
-        <div className="SearchPlaylists max-w-4xl mx-auto px-4 min-w-full">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 w-full">
 
-            {error && <p className="text-red-500">{error}</p>}
+            {error && <p className="text-red-500 text-center py-2">{error}</p>}
 
             {!selectedPlaylist ? (
 
             <>
-                <input
-                    type="text"
-                    id="myInput"
-                    onKeyUp={debouncedHandleFilter}
-                    placeholder="Search playlists ..."
-                    className="w-full p-2 mb-4 border rounded" 
-                />
-                <ul id="myUL" className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-4">
-                    {playlists.map((playlist, index) => (
-                        <li key={index} className="flex flex-col items-center">
-                            <div className="w-40 h-40 mb-2 overflow-hidden rounded-lg cursor-pointer">
-                                <img
-                                    className="w-full h-full object-cover"
-                                    src={playlist.images && playlist.images.length > 0 ? playlist.images[0].url : Spotify_Logo}
-                                    alt={playlist.name || 'Playlist'}
-                                    onClick={() => handlePlaylistClick(playlist.id)} />
-                            </div>
-                            <p className="font-semibold text-center">{playlist.name || 'Untitled Playlist'}</p>
-                            <p className="text-sm text-gray-600">Tracks: {playlist.tracks ? playlist.tracks.total : 'N/A'}</p>
-                        </li>
-                    ))}
-                </ul>
-            </>
+                    <input
+                        type="text"
+                        id="myInput"
+                        onKeyUp={debouncedHandleFilter}
+                        placeholder="Search playlists ..."
+                        className="w-full p-2 mb-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <ul id="myUL" className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {playlists.map((playlist) => (
+                            <li key={playlist.id} className="flex flex-col items-center transform transition-transform hover:scale-105">
+                                <div className="w-full aspect-square max-w-[12rem] mb-2 overflow-hidden rounded-lg shadow-md cursor-pointer">
+                                    <img
+                                        className="w-full h-full object-cover"
+                                        src={playlist.images?.[0]?.url || Spotify_Logo}
+                                        alt={playlist.name || 'Playlist'}
+                                        onClick={() => handlePlaylistClick(playlist.id)}
+                                        loading="lazy"
+                                    />
+                                </div>
+                                <p className="font-semibold text-center text-sm sm:text-base line-clamp-2">{playlist.name || 'Untitled Playlist'}</p>
+                                <p className="text-xs sm:text-sm text-gray-600">Tracks: {playlist.tracks?.total || 'N/A'}</p>
+                            </li>
+                        ))}
+                    </ul>
+                </>
 
-            ) :
+            ) : 
 
             <>
             <button onClick={() => returnToMenu()} className="flex justify-left "><SquareChevronLeft size={36}>Back</SquareChevronLeft></button>
