@@ -25,14 +25,14 @@ const Toggle = ({ isToggled, onToggle }) => {
         {/* Text elements */}
         <div className={`relative z-10 flex w-full`}>
           <span
-            className={`flex-1 p-1 sm:p-2 text-center text-sm sm:text-base transition-colors duration-300 ${
+            className={`flex-1 p-1 sm:p-2 text-center text-xs sm:text-base transition-colors duration-300 ${
               isToggled ? 'text-white' : 'text-[#343434]'
             }`}
           >
             Search Songs
           </span>
           <span
-            className={`flex-1 p-1 sm:p-2 text-center text-sm sm:text-base transition-colors duration-300 ${
+            className={`flex-1 p-1 sm:p-2 text-center text-xs sm:text-base transition-colors duration-300 ${
               isToggled ? 'text-[#343434]' : 'text-white'
             }`}
           >

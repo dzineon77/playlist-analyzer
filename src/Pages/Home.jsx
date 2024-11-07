@@ -12,48 +12,64 @@ import song2Cover from '../Assets/DemoSongIcons/StrangeLand.jpeg';
 import song3Cover from '../Assets/DemoSongIcons/MortalMan.jpeg';
 import Spotify_Logo from '../Assets/Spotify_logo_without_text.svg.png';
 
-// Demo song data with audio features
+// Demo song data structured to match Spotify API response format
 const DEMO_SONGS = [
   {
-    id: 1,
-    title: "Stayin Alive",
-    artist: "Bee Gees",
-    coverImage: song1Cover,
-    features: {
-      energy: 0.773,
-      danceability: 0.702,
-      valence: 0.953,
-      tempo: 103.56,
-      acousticness: 0.029,
-      speechiness: 0.034
+    track: {
+      id: 1,
+      name: "Stayin Alive",
+      artists: [{ name: "Bee Gees" }],
+      album: {
+        images: [{ url: song1Cover }]
+      },
+      features: {
+        energy: 0.773,
+        danceability: 0.702,
+        valence: 0.953,
+        tempo: 103.56,
+        acousticness: 0.029,
+        speechiness: 0.034
+      }
     }
   },
   {
-    id: 2,
-    title: "Strange Land",
-    artist: "88rising, NIKI, Phum Viphurit",
-    coverImage: song2Cover,
-    features: {
-      energy: 0.265,
-      danceability: 0.65,
-      valence: 0.156,
-      tempo: 75.00,
-      acousticness: 0.903,
-      speechiness: 0.050
+    track: {
+      id: 2,
+      name: "Strange Land",
+      artists: [
+        { name: "88rising" },
+        { name: "NIKI" },
+        { name: "Phum Viphurit" }
+      ],
+      album: {
+        images: [{ url: song2Cover }]
+      },
+      features: {
+        energy: 0.265,
+        danceability: 0.65,
+        valence: 0.156,
+        tempo: 75.00,
+        acousticness: 0.903,
+        speechiness: 0.050
+      }
     }
   },
   {
-    id: 3,
-    title: "Mortal Man",
-    artist: "Kendrick Lamar",
-    coverImage: song3Cover,
-    features: {
-      energy: 0.525,
-      danceability: 0.567,
-      valence: 0.416,
-      tempo: 86.94,
-      acousticness: 0.665,
-      speechiness: 0.750
+    track: {
+      id: 3,
+      name: "Mortal Man",
+      artists: [{ name: "Kendrick Lamar" }],
+      album: {
+        images: [{ url: song3Cover }]
+      },
+      features: {
+        energy: 0.525,
+        danceability: 0.567,
+        valence: 0.416,
+        tempo: 86.94,
+        acousticness: 0.665,
+        speechiness: 0.750
+      }
     }
   }
 ];
@@ -95,8 +111,7 @@ async function requestUserAuth() {
 
   const clientId = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
 
-  // const redirectUri = 'https://playlist-analyzer.vercel.app/analyze';
-  const redirectUri = 'http://localhost:3000/analyze';
+  const redirectUri = 'https://playlist-analyzer.vercel.app/analyze';
 
   const scope = 'user-read-private user-read-email playlist-read-private';
   const authUrl = new URL("https://accounts.spotify.com/authorize");
@@ -144,6 +159,11 @@ function Home() {
     }
   }, [selectedSong]);
     
+  const handleSongSelect = (trackId) => {
+    const selected = DEMO_SONGS.find(song => song.track.id === trackId);
+    setSelectedSong(selected?.track);
+  };
+
   return (
     <div className="relative min-h-screen">
       <BackgroundGradient />
@@ -163,7 +183,7 @@ function Home() {
 
               <button
                 onClick={() => setShowSlider(false)}
-                className="mb-6 p-2 md:p-4 absolute top-2 left-2 md:top-4 md:left-4 text-gray-600 hover:text-gray-800 transition-colors"
+                className="mb-6 p-2 md:p-4 absolute top-2 left-2 md:top-4 md:left-4 text-gray hover:text-gray-dark transition-colors"
               >
                 <SquareChevronLeft size={24} className="md:w-8 md:h-8" />
                 </button>
@@ -175,20 +195,20 @@ function Home() {
 
             <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-2 md:overflow-x-auto justify-start md:justify-center pb-4">
 
-              {DEMO_SONGS.map(song => (
-                <SongCard
-                  key={song.id}
-                  song={song}
-                  isSelected={selectedSong?.id === song.id}
-                  onClick={() => setSelectedSong(song)}
-                />
+                {DEMO_SONGS.map(song => (
+                  <SongCard
+                    key={song.track.id}
+                    item={song}
+                    isSelected={selectedSong?.id === song.track.id}
+                    onClick={handleSongSelect}
+                  />
               ))}
             </div>
 
             {selectedSong && (
               <div className={`transition-opacity duration-500 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
                 <h3 className="text-xl font-semibold mb-4 text-gray-800">
-                  {selectedSong.title} - {selectedSong.artist}
+                {selectedSong.name} - {selectedSong.artists.map(artist => artist.name).join(', ')}
                 </h3>
                 <div className="space-y-4">
                   <FeatureBar value={selectedSong.features.energy} label="Energy" icon={Zap} />

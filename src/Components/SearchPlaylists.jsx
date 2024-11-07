@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import Spotify_Logo from '../Assets/Spotify_logo_without_text.svg.png';
+import TrackCard from '../Components/TrackCard';
+import SongCard from '../Components/SongCard';
 import { SquareChevronLeft } from 'lucide-react';
-import FeatureCell from './FeatureCell';
 import { useSpotifyAPI } from './useSpotifyAPI';
 import { debounce } from 'lodash';
 
@@ -20,6 +20,7 @@ export default function SearchPlaylists({ playlists }) {
         const data = await fetchFromSpotify(`playlists/${playlistID}`);
         if (data) {
             setSelectedPlaylist(data);
+            // console.log(data);
             setSelectedPlaylistTracks(parsePlaylistTracks(data.tracks.items));
             setError(null);
         } else {
@@ -46,19 +47,21 @@ export default function SearchPlaylists({ playlists }) {
 
     const handleFilter = (event) => {
         const filter = event.target.value.toUpperCase();
-        const ul = document.getElementById("myUL");
-        const li = ul.getElementsByTagName("li");
+        const container = document.getElementById("myUL");
+        const cards = container.getElementsByClassName("SongCard");
         
-        for (let i = 0; i < li.length; i++) {
-            const a = li[i].getElementsByTagName("p")[0];
-            const txtValue = a.textContent || a.innerText;
-            if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                li[i].style.display = "";
-            } else {
-                li[i].style.display = "none";
-            }
+        for (let i = 0; i < cards.length; i++) {
+          const title = cards[i].querySelector('h3').textContent;
+          const subtitle = cards[i].querySelector('p').textContent;
+          const txtValue = title + ' ' + subtitle;
+          
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            cards[i].style.display = "";
+          } else {
+            cards[i].style.display = "none";
+          }
         }
-    };
+      };
 
     const debouncedHandleFilter = debounce(handleFilter, 500);
 
@@ -73,8 +76,6 @@ export default function SearchPlaylists({ playlists }) {
         console.log(tracks);
         return tracks;
     };
-
-    const MemoizedFeatureCell = React.memo(FeatureCell);
 
     const handleTrackClick = (trackID) => {
         getTrackAudioFeatures(trackID);
@@ -102,29 +103,23 @@ export default function SearchPlaylists({ playlists }) {
                         placeholder="Search playlists ..."
                         className="w-full p-2 mb-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                    <ul id="myUL" className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {playlists.map((playlist) => (
-                            <li key={playlist.id} className="flex flex-col items-center transform transition-transform hover:scale-105">
-                                <div className="w-full aspect-square max-w-[12rem] mb-2 overflow-hidden rounded-lg shadow-md cursor-pointer">
-                                    <img
-                                        className="w-full h-full object-cover"
-                                        src={playlist.images?.[0]?.url || Spotify_Logo}
-                                        alt={playlist.name || 'Playlist'}
-                                        onClick={() => handlePlaylistClick(playlist.id)}
-                                        loading="lazy"
-                                    />
-                                </div>
-                                <p className="font-semibold text-center text-sm sm:text-base line-clamp-2">{playlist.name || 'Untitled Playlist'}</p>
-                                <p className="text-xs sm:text-sm text-gray-600">Tracks: {playlist.tracks?.total || 'N/A'}</p>
-                            </li>
-                        ))}
-                    </ul>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="myUL">
+                    {playlists.map((playlist) => (
+                        <SongCard
+                        key={playlist.id}
+                        item={playlist}
+                        isPlaylist={true}
+                        onClick={handlePlaylistClick}
+                        />
+                    ))}
+                    </div>
                 </>
 
             ) : 
 
             <>
-            <button onClick={() => returnToMenu()} className="flex justify-left "><SquareChevronLeft size={36}>Back</SquareChevronLeft></button>
+            <button onClick={() => returnToMenu()} className="mb-6 p-2 md:p-4 md:absolute top-2 left-2 md:top-4 md:left-4 text-gray hover:text-gray-dark transition-colors"><SquareChevronLeft size={30}>Back</SquareChevronLeft></button>
 
             {selectedPlaylistTracks && selectedPlaylistTracks.length > 0 ? (
                 
@@ -139,41 +134,26 @@ export default function SearchPlaylists({ playlists }) {
                 />
 
                 <div className="gridContainer h-96 overflow-y-scroll mb-8">
-                    <ul id="myUL" className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-4">
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-4 mb-8" id="myUL">
                         {selectedPlaylistTracks.map((track, index) => (
-                            <li key={index} className="flex flex-col items-center overflow-hidden">
-                                <div className="w-40 h-40 mb-2 overflow-hidden rounded-lg cursor-pointer">
-                                    <img
-                                    className="w-full h-full object-cover"
-                                    src={track.track.album.images && track.track.album.images.length > 0 ? track.track.album.images[0].url : Spotify_Logo}
-                                    alt={track.track.name || 'Track'}
-                                    onClick={() => handleTrackClick(track.track.id)}
-                                    />
-                                </div>
-                                <p className="font-semibold text-center">{track.track.name || 'Untitled Track'}</p>
-                                <p className="text-sm text-gray-600">{track.track.artists ? track.track.artists.map((artist) => artist.name).join(', ') : 'N/A'}</p>
-                            </li>
+                            <SongCard
+                            key={index}
+                            item={track}
+                            isPlaylist={false}
+                            onClick={handleTrackClick}
+                            isSelected={trackAudioFeatures?.id === track.track.id}
+                            />
                         ))}
-                    </ul>
+                    </div>
                 </div>
 
                 {trackAudioFeatures && (
-                <div className="trackAudioFeatures grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 my-8">
-                    <MemoizedFeatureCell label="Mode" value={trackAudioFeatures.mode ? 'Major' : 'Minor'} useProgressBar={false} />
-                    <MemoizedFeatureCell label="Tempo" value={`${trackAudioFeatures.tempo} bpm`} useProgressBar={false} />
-                    <MemoizedFeatureCell label="Duration" value={`${Math.floor((trackAudioFeatures.duration_ms/1000)/60)}m ${Math.round((trackAudioFeatures.duration_ms/1000)%60,0)}s`} useProgressBar={false} />
-                    <MemoizedFeatureCell label="Time Signature" value={trackAudioFeatures.time_signature} useProgressBar={false} />
 
-                    <MemoizedFeatureCell label="Danceability" value={trackAudioFeatures.danceability} />
-                    <MemoizedFeatureCell label="Energy" value={trackAudioFeatures.energy} />
-                    <MemoizedFeatureCell label="Speechiness" value={trackAudioFeatures.speechiness} />
-                    <MemoizedFeatureCell label="Acousticness" value={trackAudioFeatures.acousticness} />
-                    <MemoizedFeatureCell label="Instrumentalness" value={trackAudioFeatures.instrumentalness} />
-                    <MemoizedFeatureCell label="Liveness" value={trackAudioFeatures.liveness} />
-                    <MemoizedFeatureCell label="Valence" value={trackAudioFeatures.valence} />
-                    <MemoizedFeatureCell label="Loudness" value={`${trackAudioFeatures.loudness} dB`} useProgressBar={false} />
-
-                </div>
+                    <div className="mb-8">
+                        <TrackCard audioFeatures={trackAudioFeatures} />
+                    </div>
+            
             )}
 
                 </>
@@ -182,21 +162,22 @@ export default function SearchPlaylists({ playlists }) {
                 <p className="text-red-500">No tracks found in this playlist.</p>
             )}
 
-            <script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
+            <div className="aspect-video md:aspect-square max-w-2xl rounded-lg overflow-hidden shadow-lg spotify-embed-fix">
 
-            <div id="embed-iframe">
                 <iframe
                     title="Spotify Playlist"
                     src={`https://open.spotify.com/embed/playlist/${selectedPlaylist.id}`}
                     width="100%"
-                    height="500"
-                    allowtransparency="true"
+                    height="100%"
+                    // allowTransparency="true"
                     allow="encrypted-media"
-                    className='mb-4'
-                ></iframe>
+                    className="border-0" // Negative margin only on medium and large screens
+                />
+
             </div>
 
             </>
+
             }
         </div>
     );

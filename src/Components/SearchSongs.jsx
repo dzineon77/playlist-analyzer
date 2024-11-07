@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
-import FeatureCell from './FeatureCell';
 import Instructions from '../Assets/instructions.png';
 import { useSpotifyAPI } from './useSpotifyAPI';
+import TrackCard from '../Components/TrackCard'
 
 export default function SearchSongs() {
 
@@ -31,6 +31,7 @@ export default function SearchSongs() {
         const data = await fetchFromSpotify(`audio-features/${trackID}`);
         if (data) {
             setTrackAudioFeatures(data);
+            console.log(data);
             return true;
         } else {
             setTrackAudioFeatures(null);
@@ -71,8 +72,6 @@ export default function SearchSongs() {
         getTrackAudioFeatures(trackID);
         getRecommendations(trackID);
     };
-
-    const MemoizedFeatureCell = React.memo(FeatureCell);
     
     return (
         <div className="SearchSongs mx-auto px-2 md:px-4 lg:px-8 space-y-6">
@@ -99,42 +98,32 @@ export default function SearchSongs() {
             {trackData ? (
                 <>
                 <div className="space-y-8">
-                    <div className="text-center space-y-2">
+                    {/* Negative margin only on medium and large screens */}
+                    <div className="text-center space-y-2 md:-mb-18 lg:-mb-24" >
+                        
                         <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold line-clamp-2">{trackData.name}</h3>
                         <p className="text-lg sm:text-xl md:text-2xl">{trackData.artists[0].name}</p>
                         <p className="text-lg sm:text-xl md:text-2xl line-clamp-1">
                             <strong>Album:</strong> {trackData.album.name}
-                        </p>
-                        
-                        <div className="aspect-video max-w-2xl mx-auto rounded-lg overflow-hidden shadow-lg">
+                        </p>                    
+
+                        <div className="aspect-video max-w-2xl rounded-lg overflow-hidden shadow-lg spotify-embed-fix">
                             <iframe
                                 title="Spotify Player"
                                 src={`https://open.spotify.com/embed/track/${trackData.id}`}
                                 width="100%"
                                 height="100%"
-                                allowTransparency="true"
+                                // allowTransparency="true"
                                 allow="encrypted-media"
-                                className="border-0"
+                                className="border-0" // Negative margin only on medium and large screens
                             />
                         </div>
                     </div>
 
                     {trackAudioFeatures && (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-4 bg-white rounded-lg shadow">
-                        <MemoizedFeatureCell label="Mode" value={trackAudioFeatures.mode ? 'Major' : 'Minor'} useProgressBar={false} />
-                        <MemoizedFeatureCell label="Tempo" value={`${trackAudioFeatures.tempo} bpm`} useProgressBar={false} />
-                        <MemoizedFeatureCell label="Duration" value={`${Math.floor((trackAudioFeatures.duration_ms/1000)/60)}m ${Math.round((trackAudioFeatures.duration_ms/1000)%60,0)}s`} useProgressBar={false} />
-                        <MemoizedFeatureCell label="Time Signature" value={trackAudioFeatures.time_signature} useProgressBar={false} />
 
-                        <MemoizedFeatureCell label="Danceability" value={trackAudioFeatures.danceability} />
-                        <MemoizedFeatureCell label="Energy" value={trackAudioFeatures.energy} />
-                        <MemoizedFeatureCell label="Speechiness" value={trackAudioFeatures.speechiness} />
-                        <MemoizedFeatureCell label="Acousticness" value={trackAudioFeatures.acousticness} />
-                        <MemoizedFeatureCell label="Instrumentalness" value={trackAudioFeatures.instrumentalness} />
-                        <MemoizedFeatureCell label="Liveness" value={trackAudioFeatures.liveness} />
-                        <MemoizedFeatureCell label="Valence" value={trackAudioFeatures.valence} />
-                        <MemoizedFeatureCell label="Loudness" value={`${trackAudioFeatures.loudness} dB`} useProgressBar={false} />
-                        </div>
+                        <TrackCard audioFeatures={trackAudioFeatures} />
+
                     )}
 
                     {recommendations && (
@@ -174,7 +163,7 @@ export default function SearchSongs() {
                     <img 
                         src={Instructions} 
                         alt="Instructions" 
-                        className="max-w-md mx-auto rounded-lg shadow object-scale-down"
+                        className="mx-auto rounded-lg shadow-md"
                         loading="lazy"
                     />
                 </div>
