@@ -1,70 +1,22 @@
-# Getting Started with Create React App
+# Playlist Analyzer
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This simple web app that empowers you to delve into your listening habits and discover the audio features of tracks in your Spotify playlists.
 
-## Available Scripts
+## Unfold the Secrets of Your Playlists
 
-In the project directory, you can run:
+- **Playlist Overview**: Get a comprehensive view of your Spotify playlists, including the total number of tracks, average track duration, and other key metrics.
+- **Track-Level Analysis**: Discover audio features of specific tracks of interest and find recommendations for similar tracks.
+- **Spotify Embed Integration**: Seamlessly preview and play tracks directly within the application, thanks to the integration of Spotify's iFrame embeds.
 
-### `npm start`
+## Powering the Playlist Analyzer
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **React**: The application's responsive and dynamic user interface is built upon this JavaScript library.
+- **[Spotify Web API](https://developer.spotify.com/documentation/web-api)**: Harnessing the Spotify platform's robust API, the Playlist Analyzer fetches your playlists, tracks, and user data with ease.
+- **[Vercel](https://vercel.com/)**: The application is deployed on Vercel, a cutting-edge cloud platform for static sites and serverless functions.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Getting Started
+To use the Playlist Analyzer, you'll need to have a Spotify account and grant the necessary permissions to the application. Follow these steps to get started:
 
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+1. Visit the [Playlist Analyzer](https://playlist-analyzer.vercel.app/) website and click the "Connect" button.
+2. Sign in to your Spotify account and allow the application to access your playlists and user data.
+3. Once authenticated, you'll be able to explore your playlists and dive into the detailed analysis.
