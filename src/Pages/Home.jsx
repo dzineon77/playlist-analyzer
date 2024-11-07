@@ -183,7 +183,7 @@ function Home() {
 
               <button
                 onClick={() => setShowSlider(false)}
-                className="mb-6 p-2 md:p-4 absolute top-2 left-2 md:top-4 md:left-4 text-gray hover:text-gray-dark transition-colors"
+                className="mb-2 md:mb-6 p-2 md:p-4 md:absolute top-2 left-2 md:top-4 md:left-4 text-gray hover:text-gray-dark transition-colors"
               >
                 <SquareChevronLeft size={24} className="md:w-8 md:h-8" />
                 </button>
@@ -229,8 +229,8 @@ function Home() {
           </div>
         ) : (
             <div className="main-content">
-              <div className="text-center mb-6 md:mb-8">
-                <img className="w-36 h-36 object-cover justify-self-center mb-2 md:mb-4" src={Spotify_Logo} alt='Spotify Logo'></img>
+              <div className=" mb-6 md:mb-8 text-center">
+                <img className="w-36 h-36 object-cover mb-2 md:mb-4 mx-auto" src={Spotify_Logo} alt='Spotify Logo'></img>
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Playlist Analyzer</h1>
                 <p className="text-sm md:text-base text-gray-600 px-4">Discover insights about your music by exploring audio features and trends</p>
               </div>

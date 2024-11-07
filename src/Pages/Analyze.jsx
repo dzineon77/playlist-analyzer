@@ -87,6 +87,7 @@ export default function Analyze() {
     const [playlists, setPlaylists] = useState([]);
     const [userProfileData, setUserProfileData] = useState(null);
     const [error, setError] = useState(null);
+    const [isLoaded, setIsLoaded] = useState(false);
     const { fetchFromSpotify } = useSpotifyAPI(accessToken);
 
     useEffect(() => {
@@ -97,36 +98,30 @@ export default function Analyze() {
         initializeToken();
     }, []);
 
+
     useEffect(() => {
-        if (accessToken) {
-            getUserProfile();
-            getPlaylists();
+        async function fetchData() {
+            if (accessToken) {
+                try {
+                    const [profile, playlistData] = await Promise.all([
+                        fetchFromSpotify('me'),
+                        fetchFromSpotify('me/playlists?limit=50'),
+                    ]);
+                    setUserProfileData(profile);
+                    setPlaylists(playlistData.items);
+                    setError(null);
+                    setIsLoaded(true);
+                } catch (err) {
+                    setUserProfileData([]);
+                    setPlaylists([]);
+                    setError(`Failed to fetch data: ${err.message}`);
+                    setIsLoaded(true);
+                }
+            }
         }
+        fetchData();
         //eslint-disable-next-line
-    }, [accessToken]);
-
-    // 50 is max
-    const getPlaylists = async () => {
-        const data = await fetchFromSpotify('me/playlists?limit=50');
-        if (data) {
-            setPlaylists(data.items);
-            setError(null);
-        } else {
-            setPlaylists([]);
-            setError(`Failed to fetch playlist: ${error.message}`);
-        }
-    };
-
-    const getUserProfile = async () => {
-        const data = await fetchFromSpotify('me');
-        if (data) {
-            setUserProfileData(data);
-            setError(null);
-        } else {
-            setUserProfileData([]);
-            setError(`Failed to fetch user profile: ${error.message}`);
-        }
-    };
+    }, [accessToken, fetchFromSpotify]);
 
     const handleToggleChange = () => setIsToggled(!isToggled);
 
@@ -153,8 +148,13 @@ export default function Analyze() {
                         <Toggle isToggled={isToggled} onToggle={handleToggleChange} />
 
                         <div className="results content-center">
-                            {isToggled ? <SearchPlaylists playlists={playlists}/> : <SearchSongs />}
+                            {isLoaded ? (
+                                isToggled ? <SearchPlaylists playlists={playlists} /> : <SearchSongs />
+                            ) : (
+                                <p>Loading...</p>
+                            )}
                         </div>
+
                     </div>
                 </div>
             </div>
