@@ -25,4 +25,5 @@ To use the Playlist Analyzer, you'll need to have a Spotify account and grant th
 2. Sign in to your Spotify account and allow the application to access your playlists and user data.
 3. Once authenticated, you'll be able to explore your playlists and dive into the detailed analysis.
 
+## Watch a demo
 [![Watch a demo](https://img.youtube.com/vi/CrufaX6Glsc/maxresdefault.jpg)](https://youtu.be/CrufaX6Glsc)
