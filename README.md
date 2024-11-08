@@ -26,4 +26,4 @@ To use the Playlist Analyzer, you'll need to have a Spotify account and grant th
 3. Once authenticated, you'll be able to explore your playlists and dive into the detailed analysis.
 
 ## Watch a demo
-[![Watch a demo](https://img.youtube.com/vi/CrufaX6Glsc/maxresdefault.jpg)](https://youtu.be/CrufaX6Glsc)
+[<img width="620" alt="playlist_demo_ss" src="https://github.com/user-attachments/assets/7d4c8867-e291-44d1-8b07-4b3c84823111">](https://youtu.be/CrufaX6Glsc)
