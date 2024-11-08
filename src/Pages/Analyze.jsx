@@ -11,55 +11,82 @@ const CLIENT_ID = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
 
 const REDIRECT_URI = 'https://playlist-analyzer.vercel.app/analyze';
 
-async function handleTokenResponse(response, setError) {
-    const data = await response.json();
-    if (data.access_token) {
-        sessionStorage.setItem('access_token', data.access_token);
-        return data.access_token;
-    } else {
-        console.log(`Failed to obtain access token. Error: ${data.error}`);
-        return null;
-    }
-}
-
 async function getOrRefreshToken(setError) {
+    console.log('getOrRefreshToken called');
     const code = new URLSearchParams(window.location.search).get('code');
     const storedToken = sessionStorage.getItem('access_token');
+    const tokenRequestInProgress = sessionStorage.getItem('token_request_in_progress');
     
+    // console.log('Code exists:', !!code);
+    // console.log('Stored token exists:', !!storedToken);
+    // console.log('token_request_in_progress = ', tokenRequestInProgress);
+    
+    // Return existing token if valid
     if (storedToken) {
-        // Token already stored
+        // console.log('Using stored token');
         return storedToken;
     }
-    else {
-        // Token not stored
-        if (code) {
-            // Exchange code for token
-            const codeVerifier = sessionStorage.getItem('code_verifier');
+    
+    // Prevent multiple simultaneous token requests
+    if (tokenRequestInProgress === 'true') {
+        // console.log('Token request already in progress');
+        return null;
+    }
+    
+    if (code) {
+        // console.log('Exchanging code for token');
+        // console.log('CODE = ', code);
+        const codeVerifier = sessionStorage.getItem('code_verifier');
+        // console.log('CODE VERIFIER = ', codeVerifier);
+        
+        if (!codeVerifier) {
+            // console.error('No code verifier found');
+            setError('Authentication failed: No code verifier');
+            return null;
+        }
 
+        try {
+            sessionStorage.setItem('token_request_in_progress', 'true');
+            
             const payload = {
                 method: 'POST',
                 headers: {
-                  'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Type': 'application/x-www-form-urlencoded',
                 },
                 body: new URLSearchParams({
-                  client_id: CLIENT_ID,
-                  grant_type: 'authorization_code',
-                  code,
-                  redirect_uri: REDIRECT_URI,
-                  code_verifier: codeVerifier,
+                    client_id: CLIENT_ID,
+                    grant_type: 'authorization_code',
+                    code,
+                    redirect_uri: REDIRECT_URI,
+                    code_verifier: codeVerifier,
                 }),
-              }
+            };
 
-            try {
-                const response = await fetch('https://accounts.spotify.com/api/token', payload);
-                return handleTokenResponse(response, setError);
-            } catch (error) {
-                console.log('Failed to exchange code for access token:', error);
-                setError(`Failed to exchange code for access token: ${error.message}`);
+            const response = await fetch('https://accounts.spotify.com/api/token', payload);
+            const data = await response.json();
+            
+            if (data.access_token) {
+                sessionStorage.setItem('access_token', data.access_token);
+                // console.log('TOKEN = ', data.access_token);
+
+                // Clear URL parameters and token request flag
+                window.history.replaceState({}, document.title, window.location.pathname);
+                sessionStorage.removeItem('token_request_in_progress');
+                return data.access_token;
+            } else {
+                console.error('Token exchange failed:', data.error);
+                setError(`Failed to obtain access token: ${data.error}`);
+                sessionStorage.removeItem('token_request_in_progress');
                 return null;
             }
+        } catch (error) {
+            console.error('Token exchange error:', error);
+            setError(`Failed to exchange token: ${error.message}`);
+            sessionStorage.removeItem('token_request_in_progress');
+            return null;
         }
     }
+    return null;
 }
 
 // Wrapper component to handle auth redirect (error=access_denied)
@@ -83,45 +110,57 @@ function AuthRedirectHandler({ children }) {
 export default function Analyze() {
 
     const [accessToken, setAccessToken] = useState(sessionStorage.getItem('access_token'));
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        
+        async function initializeToken() {
+            // console.log('Initializing token...');
+            const token = await getOrRefreshToken(setError);
+            if (token) {
+                // console.log('Setting new access token: ', token);
+                setAccessToken(token);
+            }
+        }
+        
+        initializeToken();
+        
+    }, [accessToken]);
+
     const [isToggled, setIsToggled] = useState(false);
     const [playlists, setPlaylists] = useState([]);
     const [userProfileData, setUserProfileData] = useState(null);
-    const [error, setError] = useState(null);
     const [isLoaded, setIsLoaded] = useState(false);
     const { fetchFromSpotify } = useSpotifyAPI(accessToken);
 
     useEffect(() => {
-        async function initializeToken() {
-            const token = await getOrRefreshToken(setError);
-            setAccessToken(token);
-        }
-        initializeToken();
-    }, []);
-
-
-    useEffect(() => {
         async function fetchData() {
-            if (accessToken) {
-                try {
-                    const [profile, playlistData] = await Promise.all([
-                        fetchFromSpotify('me'),
-                        fetchFromSpotify('me/playlists?limit=50'),
-                    ]);
+            if (!accessToken) return;
+            
+            try {
+                // Fetch profile
+                const profile = await fetchFromSpotify('me');
+                if (profile) {
                     setUserProfileData(profile);
-                    setPlaylists(playlistData.items);
-                    setError(null);
-                    setIsLoaded(true);
-                } catch (err) {
-                    setUserProfileData([]);
-                    setPlaylists([]);
-                    setError(`Failed to fetch data: ${err.message}`);
-                    setIsLoaded(true);
                 }
+
+                // Then fetch playlists 
+                const playlistData = await fetchFromSpotify('me/playlists?limit=50');
+                if (playlistData) {
+                    setPlaylists(playlistData.items);
+                }
+                
+                setError(null);
+                setIsLoaded(true);
+            } catch (err) {
+                setError(`Failed to fetch data: ${err.message}`);
+            } finally {
+                setIsLoaded(true);
             }
         }
-        fetchData();
-        //eslint-disable-next-line
-    }, [accessToken, fetchFromSpotify]);
+    
+            fetchData();
+            }, [accessToken, fetchFromSpotify]);
 
     const handleToggleChange = () => setIsToggled(!isToggled);
 
@@ -148,11 +187,11 @@ export default function Analyze() {
                         <Toggle isToggled={isToggled} onToggle={handleToggleChange} />
 
                         <div className="results content-center">
-                            {isLoaded ? (
-                                isToggled ? <SearchPlaylists playlists={playlists} /> : <SearchSongs />
-                            ) : (
-                                <p>Loading...</p>
-                            )}
+                                {isLoaded ? (
+                                    isToggled ? <SearchPlaylists playlists={playlists} /> : <SearchSongs />
+                                ) : (
+                                    <p>Loading...</p>
+                                )}
                         </div>
 
                     </div>
