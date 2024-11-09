@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowBigRightDash, SquareChevronLeft, Volume2, Mic2, Activity, Timer, Zap, Speech } from 'lucide-react';
+import { ArrowBigRightDash, SquareChevronLeft, Volume2, Mic2, Activity, Timer, Zap, Speech, TriangleAlert } from 'lucide-react';
 import BackgroundGradient from '../Components/BackgroundGradient';
 import FeatureBar from '../Components/FeatureBar';
 import SongCard from '../Components/SongCard';
@@ -142,6 +142,7 @@ function Home() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const location = useLocation();
+  const [showDevWarning, setShowDevWarning] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -228,7 +229,20 @@ function Home() {
 
           </div>
         ) : (
-            <div className="main-content">
+            <div className="main-content relative">
+              <div className='absolute top-2 right-2'>
+                <div 
+                  className='relative cursor-pointer group'
+                  onClick={() => setShowDevWarning(prev => !prev)}
+                >
+                  <TriangleAlert className='hover:scale-110 text-yellow-500' />
+                  {/* Hidden content */}
+                  <div className={`${showDevWarning ? 'opacity-100' : 'opacity-0'} group-hover:opacity-100 absolute -top-10 -right-8 bg-white/90 backdrop-blur-sm shadow-md rounded-md p-2 transition-all duration-300 whitespace-nowrap z-10`}>
+                    <p className='text-sm text-red'>App in Dev mode</p>
+                  </div>
+                </div>
+              </div>
+              
               <div className=" mb-6 md:mb-8 text-center">
                 <img className="w-36 h-36 object-cover mb-2 md:mb-4 mx-auto" src={Spotify_Logo} alt='Spotify Logo'></img>
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Playlist Analyzer</h1>

@@ -56,6 +56,9 @@ module.exports = {
         light: '#eae0cc',
         DEFAULT: '#ffffff',
       },
+      red: {
+        DEFAULT: '#EE4B2B',
+      },
     }
   },
   plugins: [],
